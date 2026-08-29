@@ -1,0 +1,12 @@
+name: aliexpress-led-strips
+url: https://www.aliexpress.com/w/wholesale-led-strip.html
+tier: auto
+max_pages: 3
+rate_limit_sec: 3.0
+items:
+  selector: "div.list-item"
+fields:
+  title: { selector: "div.title", attr: text }
+  price: { selector: "span.price-current", attr: text }
+  url:   { selector: "a", attr: href }
+output: csv
