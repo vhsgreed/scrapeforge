@@ -33,6 +33,17 @@ def _run_batch(args):
     batch_main()
 
 
+def _run_page(args):
+    from .pageprobe import main as page_main
+    import sys as _sys
+    argv = ["scrapeforge", *args.files, "--out", args.out,
+            "--workers", str(args.workers)]
+    if args.tiers:
+        argv += ["--tiers", args.tiers]
+    _sys.argv = argv
+    page_main()
+
+
 def cmd_run(args):
     with open(args.config, encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
@@ -87,6 +98,13 @@ def main(argv=None):
     p_batch.add_argument("--out", default="probe-results.csv")
     p_batch.add_argument("--workers", type=int, default=6)
     p_batch.set_defaults(func=lambda a: _run_batch(a))
+
+    p_page = sub.add_parser("pageprobe", help="pagination-advance matrix (see pageprobe.py)")
+    p_page.add_argument("files", nargs="+")
+    p_page.add_argument("--out", default="pagination-matrix.csv")
+    p_page.add_argument("--tiers", default=None)
+    p_page.add_argument("--workers", type=int, default=5)
+    p_page.set_defaults(func=lambda a: _run_page(a))
 
     p_run = sub.add_parser("run", help="run a YAML scrape config")
     p_run.add_argument("config")
