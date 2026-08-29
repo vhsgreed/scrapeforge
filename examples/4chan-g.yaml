@@ -1,0 +1,12 @@
+name: 4chan-g
+url: https://boards.4chan.org/g/
+tier: 2
+max_pages: 3
+rate_limit_sec: 2.0
+items:
+  selector: "div.thread div.opContainer"
+fields:
+  subject: { selector: "span.subject", attr: text }
+  body:    { selector: "blockquote", attr: text }
+  replies: { selector: "div.posts", attr: text }
+output: json

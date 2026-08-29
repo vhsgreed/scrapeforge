@@ -58,3 +58,12 @@ can honestly deliver. Tier = scrapeforge tier needed.
 - Rate limits: AliExpress-style sites challenge after bursts. scrapeforge
   rate_limit_sec config + probe-first flow handles this.
 - Re-verify per order: `python3 -m scrapeforge probe <url>` before promising.
+
+## Added 15:29 (Karl: check HN + 4chan)
+
+| Site | Tier | Verdict |
+|---|---|---|
+| Hacker News | 1 | ✅ 3 pages / 90 items (titles, URLs, scores) |
+| 4chan /g/ | 2 | ✅ 15 threads (subjects + bodies), JSON output |
+
+Both added as example configs: examples/hn-front.yaml, examples/4chan-g.yaml.

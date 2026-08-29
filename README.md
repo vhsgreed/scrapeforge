@@ -119,4 +119,5 @@ it and you decide with the site's terms in mind.
 - `scrapeforge/output.py` — CSV/JSON writers
 - `scrapeforge/cli.py` — probe/batchprobe/pageprobe/run commands
 - `examples/hn-front.yaml` — working example (tier 1, paginated)
+- `examples/4chan-g.yaml` — tier 2 example (verified live 08-29)
 - `examples/aliexpress.yaml` — tier 2 example (verified live 08-29)
