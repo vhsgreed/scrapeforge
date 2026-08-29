@@ -20,8 +20,14 @@ you commit.
 ## Install
 
 ```bash
+git clone https://github.com/vhsgreed/scrapeforge
+cd scrapeforge
 pip install curl_cffi httpx pyyaml beautifulsoup4
-# optional, tier 3 only:
+```
+
+Tier 3 (browser stealth) is optional:
+
+```bash
 pip install scrapling   # or cloakbrowser / playwright
 ```
 
@@ -29,16 +35,16 @@ pip install scrapling   # or cloakbrowser / playwright
 
 ```bash
 # classify a single site (tier 1/2/3, confident, notes)
-python -m scrapeforge probe https://www.aliexpress.com/
+python3 -m scrapeforge probe https://www.aliexpress.com/
 
 # batch-classify many sites -> results CSV
-python -m scrapeforge batchprobe urls.txt --out results.csv
+python3 -m scrapeforge batchprobe urls.txt --out results.csv
 
 # certify pagination works on a target (next-link -> page 2 -> content change)
-python -m scrapeforge pageprobe urls.txt --tiers results.csv --out matrix.csv
+python3 -m scrapeforge pageprobe urls.txt --tiers results.csv --out matrix.csv
 
 # run a scrape config
-python -m scrapeforge run examples/hn-front.yaml --out data.csv
+python3 -m scrapeforge run examples/hn-front.yaml --out data.csv
 ```
 
 ## Config format
