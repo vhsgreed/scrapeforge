@@ -21,10 +21,26 @@ scraping gig can honestly promise. Tier = scrapeforge tier needed.
 | Site | Status | Block |
 |---|---|---|
 | Amazon | 202 | Empty/challenge, needs full browser emulation + ToS risk |
+| eBay | 200 | **HARD BLOCK 14:14 (IP flagged after ~10 probes today):** homepage + search both return "SORRY" / "Pardon Our Interruption" Akamai challenge to curl_cffi, playwright, cloakbrowser AND scrapling stealth. Home IP burned — cools off hours/days |
 | Etsy | 403 | Captcha page, 779 bytes |
 | Booking | 202 | Challenge page |
 | IMDB | 202 | Challenge page |
-| StackOverflow | 403 | Cloudflare challenge |
+| StackOverflow | 403 | Cloudflare "Just a moment" JS challenge — scrapling solve_cloudflare did NOT crack it (14:14) |
+
+## Tier-3 tooling status (tested 14:14)
+
+| Tool | Result | Verdict |
+|---|---|---|
+| playwright (plain) | Blocked by eBay | Detected immediately |
+| cloakbrowser (C++ source patches) | Blocked by eBay | Good tool, IP was already flagged; fonts needed (installed) |
+| scrapling StealthySession (patchright) | Blocked by eBay + SO | Best tier-3 addition (auto-cloudflare), but not magic; hard JS challenges win |
+| curl_cffi | WORKS tier 2 | The workhorse — verified 8 sites |
+
+## Hard-won lessons (from 14:00-14:15 testing)
+
+1. **IP reputation is the real gate.** eBay flagged our home IP after ~10 probes in an hour. Once flagged, EVERY tool fails (even homepage). Probe gently, rate-limit, don't burn targets.
+2. **Never promise a site without probing it first.** The probe-first flow is not optional — it's the product.
+3. **Tier 3 is an arms race.** JS-proof challenges (Akamai POTI, Cloudflare managed) beat every open-source tool from a single IP. Residential proxy + rotation is the only reliable answer, and that's a cost/scale decision per order.
 
 ## Gig promises (grounded in this matrix)
 

@@ -52,7 +52,16 @@ def _fetch_curl_cffi(url, timeout, proxy, cookies) -> tuple[int, str]:
 
 
 def _fetch_browser(url, timeout, proxy, cookies) -> tuple[int, str]:
-    """Amazon-class. Try cloakbrowser, then playwright stealth."""
+    """Amazon/eBay-class. Try scrapling (patchright stealth + cloudflare
+    solve), then cloakbrowser, then plain playwright. None are magic; the
+    probe-first flow decides whether tier 3 is even offered."""
+    try:
+        from scrapling.fetchers import StealthySession
+        with StealthySession(headless=True) as session:
+            page = session.fetch(url, solve_cloudflare=True)
+            return 200, page.html_content
+    except ImportError:
+        pass
     try:
         from cloakbrowser import launch
         ctx = launch(headless=True, proxy=proxy)
@@ -79,5 +88,5 @@ def _fetch_browser(url, timeout, proxy, cookies) -> tuple[int, str]:
             browser.close()
             return 200, html
     except ImportError as e:
-        raise FetchError("tier 3 needs cloakbrowser or playwright "
-                         "+ invisible_playwright") from e
+        raise FetchError("tier 3 needs scrapling or cloakbrowser or playwright "
+                         "+ stealth deps") from e

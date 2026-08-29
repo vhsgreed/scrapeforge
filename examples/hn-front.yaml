@@ -1,0 +1,16 @@
+name: hn-front
+url: https://news.ycombinator.com/news
+tier: 1
+max_pages: 10
+rate_limit_sec: 1.0
+paginate:
+  selector: "a.morelink"
+  attribute: href
+  next_text: "More"
+items:
+  selector: "tr.athing"
+fields:
+  title: { selector: "span.titleline a", attr: text }
+  url:   { selector: "span.titleline a", attr: href }
+  score: { selector: "span.score", attr: text, scope: global }
+output: csv
