@@ -1,0 +1,151 @@
+tier,status,bytes,confident,via,host,url,note
+1,200,5044,True,httpx,32bit.cafe,https://32bit.cafe/,static page
+1,200,99171,True,httpx,basementcommunity.com,https://basementcommunity.com/,static page
+1,200,128989,True,httpx,cameronsworld.net,https://cameronsworld.net/,static page
+1,200,8869,True,httpx,floor796.com,https://floor796.com/,static page
+1,200,12138,True,httpx,gradient.horse,https://gradient.horse/,static page
+1,200,17902,True,httpx,imissmycafe.com,https://imissmycafe.com/,static page
+1,200,112652,True,httpx,itch.io,https://itch.io/,static page
+1,200,60706,True,httpx,lofi.town,https://lofi.town/,static page
+1,200,8642,True,httpx,marginalia.nu,https://marginalia.nu/,static page
+1,200,11625,True,httpx,melonking.net,https://melonking.net/,static page
+1,200,9981,True,httpx,midnight.pub,https://midnight.pub/,static page
+1,200,1530,True,httpx,penpalworld.com,https://penpalworld.com/,static page
+1,200,22365,True,httpx,rejectconvenience.com,https://rejectconvenience.com/,static page
+1,200,254987,True,httpx,retrododo.com,https://retrododo.com/,static page
+1,200,16475,True,httpx,spacehey.com,https://spacehey.com/,static page
+1,200,77552,True,httpx,texs.org,https://texs.org/,static page
+1,200,479,True,httpx,theuselessweb.org,https://theuselessweb.org/,static page
+1,200,1537,True,httpx,wiby.org,https://wiby.org/,static page
+1,200,25709,True,httpx,writeexpress.com,https://writeexpress.com/,static page
+1,429,31036,True,httpx,www.adlibris.com,https://www.adlibris.com/,static page
+1,200,1261176,True,httpx,www.afound.com,https://www.afound.com/,static page
+1,200,622776,True,httpx,www.ahlens.se,https://www.ahlens.se/,static page
+1,200,751085,True,httpx,www.apotea.se,https://www.apotea.se/,static page
+1,200,437927,True,httpx,www.apoteket.se,https://www.apoteket.se/,static page
+1,200,254222,True,httpx,www.apple.com,https://www.apple.com/,static page
+1,200,290365,True,httpx,www.biltema.se,https://www.biltema.se/,static page
+1,200,370617,True,httpx,www.blocket.se,https://www.blocket.se/,static page
+1,200,604692,True,httpx,www.bonprix.de,https://www.bonprix.de/,static page
+1,200,628896,True,httpx,www.boozt.com,https://www.boozt.com/,static page
+1,200,688948,True,httpx,www.breuninger.com,https://www.breuninger.com/,static page
+1,200,11673,True,httpx,www.calculator.net,https://www.calculator.net/,static page
+1,200,1556670,True,httpx,www.cdon.se,https://www.cdon.se/,static page
+1,200,125617,True,httpx,www.coop.se,https://www.coop.se/,static page
+1,200,617579,True,httpx,www.deichmann.com,https://www.deichmann.com/,static page
+1,400,339,True,httpx,www.douglas.de,https://www.douglas.de/,static page
+1,429,31033,True,httpx,www.elgiganten.se,https://www.elgiganten.se/,static page
+1,200,1150975,True,httpx,www.ellos.se,https://www.ellos.se/,static page
+1,200,224771,True,httpx,www.ica.se,https://www.ica.se/,static page
+1,200,565964,True,httpx,www.ikea.com,https://www.ikea.com/,static page
+1,200,2004938,True,httpx,www.ikea.se,https://www.ikea.se/,static page
+1,200,294375,True,httpx,www.inet.se,https://www.inet.se/,static page
+1,200,919207,True,httpx,www.k-bygg.se,https://www.k-bygg.se/,static page
+1,200,1520725,True,httpx,www.kicks.se,https://www.kicks.se/,static page
+1,200,341106,True,httpx,www.kitchentime.se,https://www.kitchentime.se/,static page
+1,200,849436,True,httpx,www.lidl.de,https://www.lidl.de/,static page
+1,200,1239200,True,httpx,www.lyko.se,https://www.lyko.se/,static page
+1,200,197390,True,httpx,www.mango.com,https://www.mango.com/,static page
+1,200,362643,True,httpx,www.mathem.se,https://www.mathem.se/,static page
+1,200,9834,True,httpx,www.mytheresa.com,https://www.mytheresa.com/,static page
+1,200,382298,True,httpx,www.na-kd.com,https://www.na-kd.com/,static page
+1,200,281280,True,httpx,www.nelly.com,https://www.nelly.com/,static page
+1,200,30827,True,httpx,www.postcrossing.com,https://www.postcrossing.com/,static page
+1,418,1135,True,httpx,www.qvc.de,https://www.qvc.de/,static page
+1,200,542820,True,httpx,www.refurbed.de,https://www.refurbed.de/,static page
+1,200,226841,True,httpx,www.reichelt.de,https://www.reichelt.de/,static page
+1,200,223635,True,httpx,www.rusta.se,https://www.rusta.se/,static page
+1,200,5809,True,httpx,www.sellpy.se,https://www.sellpy.se/,static page
+1,200,364988,True,httpx,www.stadium.se,https://www.stadium.se/,static page
+1,200,1889021,True,httpx,www.tchibo.de,https://www.tchibo.de/,static page
+1,200,134606,True,httpx,www.themarginalian.org,https://www.themarginalian.org/,static page
+1,200,14583,True,httpx,www.unitconverters.net,https://www.unitconverters.net/,static page
+1,200,79054,True,httpx,www.webhallen.se,https://www.webhallen.se/,static page
+1,200,759350,True,httpx,www.westwing.de,https://www.westwing.de/,static page
+1,403,161386,True,httpx,www.zalando.de,https://www.zalando.de/,static page
+1,403,160928,True,httpx,www.zalando.se,https://www.zalando.se/,static page
+1,200,2782994,True,httpx,www.zoo.se,https://www.zoo.se/,static page
+2,200,95360,True,httpx,cloudhiker.net,https://cloudhiker.net/,"real page served, TLS impersonation recommended"
+2,200,323141,True,httpx,dogfoodadvisor.com,https://dogfoodadvisor.com/,"real page served, TLS impersonation recommended"
+2,200,3537016,True,httpx,everynoise.com,https://everynoise.com/,"real page served, TLS impersonation recommended"
+2,200,303068,True,httpx,flashmuseum.org,https://flashmuseum.org/,"real page served, TLS impersonation recommended"
+2,200,76097,True,httpx,nekoweb.org,https://nekoweb.org/,"real page served, TLS impersonation recommended"
+2,200,459600,True,httpx,nightmind.info,https://nightmind.info/,"real page served, TLS impersonation recommended"
+2,200,174672,True,httpx,pixeljoint.com,https://pixeljoint.com/,"real page served, TLS impersonation recommended"
+2,200,122206,True,httpx,sheezy.art,https://sheezy.art/,"real page served, TLS impersonation recommended"
+2,200,3073368,True,httpx,sirkadeansidequests.com,https://sirkadeansidequests.com/,"real page served, TLS impersonation recommended"
+2,200,54377,True,httpx,springhole.net,https://springhole.net/,"real page served, TLS impersonation recommended"
+2,200,833609,True,httpx,www.aboutyou.de,https://www.aboutyou.de/,"real page served, TLS impersonation recommended"
+2,200,271720,True,curl_cffi,www.asos.com,https://www.asos.com/,served via TLS impersonation (curl_cffi)
+2,403,631431,True,httpx,www.bauhaus.info,https://www.bauhaus.info/,"real page served, TLS impersonation recommended"
+2,200,1312370,True,httpx,www.baur.de,https://www.baur.de/,"real page served, TLS impersonation recommended"
+2,200,1828545,True,httpx,www.cyclingweekly.com,https://www.cyclingweekly.com/,"real page served, TLS impersonation recommended"
+2,200,448804,True,httpx,www.docmorris.de,https://www.docmorris.de/,"real page served, TLS impersonation recommended"
+2,403,70921,True,httpx,www.galaxus.de,https://www.galaxus.de/,"real page served, TLS impersonation recommended"
+2,200,113216,True,httpx,www.gravis.de,https://www.gravis.de/,"real page served, TLS impersonation recommended"
+2,200,408584,True,httpx,www.jysk.se,https://www.jysk.se/,"real page served, TLS impersonation recommended"
+2,200,521927,True,curl_cffi,www.komplett.se,https://www.komplett.se/,served via TLS impersonation (curl_cffi)
+2,200,271756,True,httpx,www.kontorsgiganten.se,https://www.kontorsgiganten.se/,"real page served, TLS impersonation recommended"
+2,200,666411,True,httpx,www.lekmer.se,https://www.lekmer.se/,"real page served, TLS impersonation recommended"
+2,200,912862,True,httpx,www.mio.se,https://www.mio.se/,"real page served, TLS impersonation recommended"
+2,200,1445310,True,httpx,www.netonnet.se,https://www.netonnet.se/,"real page served, TLS impersonation recommended"
+2,200,526103,True,httpx,www.obi.de,https://www.obi.de/,"real page served, TLS impersonation recommended"
+2,200,464096,True,httpx,www.otto.de,https://www.otto.de/,"real page served, TLS impersonation recommended"
+2,200,834830,True,httpx,www.proteinbolaget.se,https://www.proteinbolaget.se/,"real page served, TLS impersonation recommended"
+2,403,251800,True,httpx,www.rewe.de,https://www.rewe.de/,"real page served, TLS impersonation recommended"
+2,200,1110952,True,httpx,www.shein.com,https://www.shein.com/,"real page served, TLS impersonation recommended"
+2,200,571995,True,httpx,www.shop-apotheke.com,https://www.shop-apotheke.com/,"real page served, TLS impersonation recommended"
+2,200,681542,True,httpx,www.sportamore.com,https://www.sportamore.com/,"real page served, TLS impersonation recommended"
+2,200,988999,True,httpx,www.spreadshirt.de,https://www.spreadshirt.de/,"real page served, TLS impersonation recommended"
+2,200,1086142,True,httpx,www.temashop.se,https://www.temashop.se/,"real page served, TLS impersonation recommended"
+2,200,575445,True,httpx,www.thomann.de,https://www.thomann.de/,"real page served, TLS impersonation recommended"
+2,200,270511,True,httpx,www.tradera.com,https://www.tradera.com/,"real page served, TLS impersonation recommended"
+2,200,322219,True,httpx,www.windeln.de,https://www.windeln.de/,"real page served, TLS impersonation recommended"
+2,200,614677,True,httpx,www.xxl.se,https://www.xxl.se/,"real page served, TLS impersonation recommended"
+3,200,1689,True,httpx,bitview.net,https://bitview.net/,blocked: challenge
+3,200,2853,True,httpx,modelhorseblab.com,https://modelhorseblab.com/,blocked: challenge
+3,200,9201,True,httpx,searchmysite.net,https://searchmysite.net/,blocked: challenge
+3,200,15949,True,httpx,swap-bot.com,https://swap-bot.com/,blocked: challenge
+3,202,0,True,httpx,www.amazon.de,https://www.amazon.de/,blocked: empty/challenged response
+3,202,0,True,httpx,www.amazon.se,https://www.amazon.se/,blocked: empty/challenged response
+3,200,2123,True,httpx,www.bershka.com,https://www.bershka.com/,blocked: challenge
+3,403,5620,True,httpx,www.carlings.com,https://www.carlings.com/,blocked: cloudflare
+3,200,3036,True,httpx,www.clasohlson.se,https://www.clasohlson.se/,blocked: challenge
+3,403,5624,True,httpx,www.cloudynights.com,https://www.cloudynights.com/,blocked: cloudflare
+3,403,5596,True,httpx,www.conrad.de,https://www.conrad.de/,blocked: cloudflare
+3,403,5620,True,httpx,www.cyberport.de,https://www.cyberport.de/,blocked: cloudflare
+3,403,5620,True,httpx,www.decathlon.de,https://www.decathlon.de/,blocked: cloudflare
+3,200,11199,True,httpx,www.dm.de,https://www.dm.de/,blocked: challenge
+3,403,5621,True,httpx,www.dressmann.com,https://www.dressmann.com/,blocked: cloudflare
+3,403,1831,True,httpx,www.ebay.de,https://www.ebay.de/,blocked: empty/challenged response
+3,403,5661,True,httpx,www.flaconi.de,https://www.flaconi.de/,blocked: cloudflare
+3,403,3896,True,httpx,www.home24.de,https://www.home24.de/,blocked: empty/challenged response
+3,200,3036,True,httpx,www.hornbach.de,https://www.hornbach.de/,blocked: challenge
+3,403,3888,True,httpx,www.idealo.de,https://www.idealo.de/,blocked: empty/challenged response
+3,403,10997,True,httpx,www.kaufland.de,https://www.kaufland.de/,blocked: empty/challenged response
+3,403,5661,True,httpx,www.manomano.de,https://www.manomano.de/,blocked: cloudflare
+3,403,13328,True,httpx,www.mediamarkt.de,https://www.mediamarkt.de/,blocked: empty/challenged response
+3,403,390,True,httpx,www.medikamente-per-klick.de,https://www.medikamente-per-klick.de/,blocked: akamai
+3,403,5629,True,httpx,www.moneysavingexpert.com,https://www.moneysavingexpert.com/,blocked: cloudflare
+3,403,375,True,httpx,www.netto-online.de,https://www.netto-online.de/,blocked: akamai
+3,403,868,True,httpx,www.notebooksbilliger.de,https://www.notebooksbilliger.de/,blocked: empty/challenged response
+3,403,5755,True,httpx,www.peek-cloppenburg.de,https://www.peek-cloppenburg.de/,blocked: cloudflare
+3,403,7707,True,httpx,www.saturn.de,https://www.saturn.de/,blocked: empty/challenged response
+3,403,368,True,httpx,www.sephora.se,https://www.sephora.se/,blocked: akamai
+3,403,12207,True,httpx,www.thalia.de,https://www.thalia.de/,blocked: empty/challenged response
+3,403,5620,True,httpx,www.vinoteket.se,https://www.vinoteket.se/,blocked: cloudflare
+3,429,5825,True,httpx,www.wayfair.de,https://www.wayfair.de/,blocked: empty/challenged response
+3,403,367,True,httpx,www.weekday.com,https://www.weekday.com/,blocked: akamai
+3,403,12361,True,httpx,www.weltbild.de,https://www.weltbild.de/,blocked: empty/challenged response
+3,403,5639,True,httpx,www.xxxlutz.de,https://www.xxxlutz.de/,blocked: cloudflare
+3,403,365,True,httpx,www2.hm.com,https://www2.hm.com/,blocked: akamai
+9,0,0,False,httpx-fail:ConnectError,comfybox.net,https://comfybox.net/,both failed: DNSError
+9,0,0,False,httpx,friendproject.net,https://friendproject.net/,no result (unexpected)
+9,0,0,False,httpx-fail:ConnectError,jigsaw-explorer.com,https://jigsaw-explorer.com/,both failed: DNSError
+9,0,0,False,httpx,neocities.org,https://neocities.org/,no result (unexpected)
+9,0,0,False,httpx-fail:ConnectError,pixellounge.net,https://pixellounge.net/,both failed: DNSError
+9,0,0,False,httpx-fail:ConnectTimeout,scp-wiki.net,https://scp-wiki.net/,both failed: Timeout
+9,0,0,False,httpx,sudomemo.com,https://sudomemo.com/,no result (unexpected)
+9,0,0,False,httpx-fail:ConnectError,thewebraft.com,https://thewebraft.com/,both failed: DNSError
+9,0,0,False,httpx-fail:ConnectError,www.fedoralounge.com,https://www.fedoralounge.com/,both failed: DNSError
+9,0,0,False,httpx,www.millionshort.com,https://www.millionshort.com/,no result (unexpected)

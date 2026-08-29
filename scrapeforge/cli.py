@@ -25,6 +25,14 @@ def cmd_probe(args):
         print(f"note:     {res.note}")
 
 
+def _run_batch(args):
+    from .batchprobe import main as batch_main
+    import sys as _sys
+    _sys.argv = ["scrapeforge", *args.files, "--out", args.out,
+                 "--workers", str(args.workers)]
+    batch_main()
+
+
 def cmd_run(args):
     with open(args.config, encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
@@ -73,6 +81,12 @@ def main(argv=None):
     p_probe = sub.add_parser("probe", help="classify a site's anti-bot tier")
     p_probe.add_argument("url")
     p_probe.set_defaults(func=cmd_probe)
+
+    p_batch = sub.add_parser("batchprobe", help="classify many sites (see batchprobe.py)")
+    p_batch.add_argument("files", nargs="+")
+    p_batch.add_argument("--out", default="probe-results.csv")
+    p_batch.add_argument("--workers", type=int, default=6)
+    p_batch.set_defaults(func=lambda a: _run_batch(a))
 
     p_run = sub.add_parser("run", help="run a YAML scrape config")
     p_run.add_argument("config")
