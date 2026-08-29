@@ -1,7 +1,7 @@
 # Verified delivery matrix — tested live 2026-08-29
 
-Probed from hub (home IP, Europe/Stockholm). Basis for what the Fiverr
-scraping gig can honestly promise. Tier = scrapeforge tier needed.
+Probed from hub (home IP, Europe/Stockholm). Basis for what scrapeforge
+can honestly deliver. Tier = scrapeforge tier needed.
 
 ## ✅ Deliverable now (tier 1-2, verified working)
 
@@ -42,7 +42,7 @@ scraping gig can honestly promise. Tier = scrapeforge tier needed.
 2. **Never promise a site without probing it first.** The probe-first flow is not optional — it's the product.
 3. **Tier 3 is an arms race.** JS-proof challenges (Akamai POTI, Cloudflare managed) beat every open-source tool from a single IP. Residential proxy + rotation is the only reliable answer, and that's a cost/scale decision per order.
 
-## Gig promises (grounded in this matrix)
+## Honest delivery promises (grounded in this matrix)
 
 - "Most public sites" + named examples (AliExpress, eBay, Reddit, Indeed,
   Walmart, Zillow, Wikipedia, HN)
