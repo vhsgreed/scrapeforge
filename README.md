@@ -127,3 +127,7 @@ it and you decide with the site's terms in mind.
 - `examples/hn-front.yaml` — working example (tier 1, paginated)
 - `examples/4chan-g.yaml` — tier 2 example (verified live 08-29)
 - `examples/aliexpress.yaml` — tier 2 example (verified live 08-29)
+
+## Links
+
+Part of the [vhsgreed](https://vhsgreed.win) toolset — browser actors and scraping work at [vhsgreed.win/actor](https://vhsgreed.win/actor/).
