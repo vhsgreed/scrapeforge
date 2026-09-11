@@ -11,6 +11,10 @@ from .extract import extract_items
 from .fetch import fetch
 from .output import write
 from .paginate import paginate
+from .verify import (EXIT_EMPTY, print_report, verify_file,
+                     verify_records)
+
+EXIT_BLOCKED = 3
 
 
 def cmd_probe(args):
@@ -23,6 +27,12 @@ def cmd_probe(args):
     print(f"markers:  {res.markers}")
     if res.note:
         print(f"note:     {res.note}")
+    # --fail-blocked makes the probe path usable in scripts: a walled target
+    # is a loud non-zero exit, not a silent success.
+    if args.fail_blocked and (res.tier >= 3 or not res.confident):
+        print(f"[probe] FAIL: tier {res.tier}, not confidently reachable",
+              file=sys.stderr)
+        sys.exit(EXIT_BLOCKED)
 
 
 def _run_batch(args):
@@ -79,6 +89,22 @@ def cmd_run(args):
     write(rows, out, cfg.get("output", "csv"))
     print(f"[saved] {out} ({len(rows)} rows)")
 
+    # Verify by data, not by exit code: assert the row count and show a
+    # sample. Empty output is a loud failure, not a quiet success.
+    res = verify_records(rows, min_rows=args.min_rows, sample=args.sample,
+                         source=out)
+    print_report(res, stream=sys.stderr)
+    if not res.ok:
+        sys.exit(EXIT_EMPTY)
+
+
+def cmd_verify(args):
+    res = verify_file(args.path, fmt=args.format,
+                      min_rows=args.min_rows, sample=args.sample)
+    print_report(res)
+    if not res.ok:
+        sys.exit(EXIT_EMPTY)
+
 
 def json_dump(item):
     import json
@@ -91,6 +117,8 @@ def main(argv=None):
 
     p_probe = sub.add_parser("probe", help="classify a site's anti-bot tier")
     p_probe.add_argument("url")
+    p_probe.add_argument("--fail-blocked", action="store_true",
+                         help="exit non-zero (3) when the target is walled")
     p_probe.set_defaults(func=cmd_probe)
 
     p_batch = sub.add_parser("batchprobe", help="classify many sites (see batchprobe.py)")
@@ -109,7 +137,20 @@ def main(argv=None):
     p_run = sub.add_parser("run", help="run a YAML scrape config")
     p_run.add_argument("config")
     p_run.add_argument("--out", default=None)
+    p_run.add_argument("--min-rows", type=int, default=1,
+                       help="fail if fewer rows are extracted (default 1)")
+    p_run.add_argument("--sample", type=int, default=3,
+                       help="records to print as a sample (default 3)")
     p_run.set_defaults(func=cmd_run)
+
+    p_verify = sub.add_parser(
+        "verify", help="assert a dataset file is non-empty and show a sample")
+    p_verify.add_argument("path", help="CSV / JSON / JSONL dataset file")
+    p_verify.add_argument("--format", choices=["csv", "json", "jsonl"],
+                          default=None, help="default: infer from extension")
+    p_verify.add_argument("--min-rows", type=int, default=1)
+    p_verify.add_argument("--sample", type=int, default=3)
+    p_verify.set_defaults(func=cmd_verify)
 
     args = p.parse_args(argv)
     args.func(args)

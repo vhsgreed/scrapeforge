@@ -1,7 +1,13 @@
-curl_cffi>=0.7
-httpx>=0.27
-beautifulsoup4>=4.12
-PyYAML>=6.0
-# tier 3 (Amazon-class), optional:
-# cloakbrowser>=1.0
-# playwright>=1.45
+# Core deps: tier 1 (plain HTTP) + tier 2 (TLS impersonation).
+# Pinned to the ranges tested with scrapeforge 0.2.0 on Python 3.11-3.14.
+httpx>=0.27,<0.29
+curl_cffi>=0.7,<0.17
+beautifulsoup4>=4.12,<5
+PyYAML>=6.0,<7
+
+# Tier 3 (browser stealth, Amazon-class anti-bot) is OPTIONAL and heavy.
+# Install one of these directly only when a probe says tier 3 is needed:
+#   pip install scrapling     # StealthySession: patchright + cloudflare solve
+#   pip install cloakbrowser  # source-patched Chromium
+#   pip install playwright    # plain fallback, weakest of the three
+# Tier 3 is never the default and is not promised for any site.

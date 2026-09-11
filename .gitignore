@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# Scraped datasets: never commit these. The two dated result snapshots are
+# the only CSVs tracked on purpose.
+*.csv
+!results-stress-test-2026-08-29.csv
+!pagination-matrix-homepages-2026-08-29.csv
+*.jsonl

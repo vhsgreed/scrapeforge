@@ -1,69 +1,102 @@
-# Verified delivery matrix — tested live 2026-08-29
+# Verified delivery matrix
 
-Probed from hub (home IP, Europe/Stockholm). Basis for what scrapeforge
-can honestly deliver. Tier = scrapeforge tier needed.
+What scrapeforge can reach, and what is walled, with the date each verdict was
+measured. Reachability is IP- and time-dependent, so treat every row as a
+dated snapshot. Re-probe with `python3 -m scrapeforge probe <url>` before you
+rely on a site.
 
-## ✅ Deliverable now (tier 1-2, verified working)
+Tier = the scrapeforge fetch tier the target needed.
 
-| Site | Tier | Verdict |
+## Tier definitions
+
+| Tier | Tool | Meaning |
 |---|---|---|
-| AliExpress | 2 | Full 388KB page, real title/links. NOTE: rate-limits after ~10 rapid requests — use delays |
-| eBay | 2 | Full page served |
-| Reddit | 2 | Full page (old/regular HTML served) |
-| Indeed | 2 | Full page served |
-| Walmart | 2 | Full page served |
-| Zillow | 2 | Full page served |
-| Wikipedia | 1 | Static, trivial |
-| Hacker News | 1 | Static, trivial |
+| 1 | `httpx` plain HTTP | Static HTML in the response body |
+| 2 | `curl_cffi` TLS impersonation | A browser TLS fingerprint is enough to get real HTML |
+| 3 | browser stealth (`scrapling` / `cloakbrowser` / `playwright`) | Browser-class wall, and often still not enough |
 
-## ❌ Blocked from this IP (do NOT promise without tier 3 discussion)
+## Verified live in this session, 2026-09-11
 
-| Site | Status | Block |
+Home IP, Europe/Stockholm. Single low-volume probes.
+
+| Target | Tier | Result |
 |---|---|---|
-| Amazon | 202 | Empty/challenge, needs full browser emulation + ToS risk |
-| eBay | 200 | **HARD BLOCK 14:14 (IP flagged after ~10 probes today):** homepage + search both return "SORRY" / "Pardon Our Interruption" Akamai challenge to curl_cffi, playwright, cloakbrowser AND scrapling stealth. Home IP burned — cools off hours/days |
-| Etsy | 403 | Captcha page, 779 bytes |
-| Booking | 202 | Challenge page |
-| IMDB | 202 | Challenge page |
-| StackOverflow | 403 | Cloudflare "Just a moment" JS challenge — scrapling solve_cloudflare did NOT crack it (14:14) |
+| example.com | 1 | 200, 559 bytes, static |
+| docs.python.org/3/ | 1 | 200, 19.4 KB, static |
+| news.ycombinator.com | 1 | 200, 35 KB, static |
+| books.toscrape.com | 1 | 200, 51 KB, static |
+| quotes.toscrape.com | 1 | 200, 11 KB, static |
+| www.aliexpress.com | 2 | 200, 506 KB real page served via curl_cffi TLS impersonation |
 
-## Tier-3 tooling status (tested 14:14)
+AliExpress served a full 506 KB page through curl_cffi, which is the cleanest
+demonstration that tier 2 does what tier 1 cannot on a protected site. It
+rate-limits after a burst of rapid requests, so keep `rate_limit_sec` at 3.0
+or higher.
 
-| Tool | Result | Verdict |
+## Prior evidence, dated, not re-verified today
+
+Probed 2026-08-29 from the same hub.
+
+| Target | Tier | Result | Date |
+|---|---|---|---|
+| AliExpress | 2 | Full 388 KB page, real title and links | 2026-08-29 |
+| eBay | 2 | Full page served | 2026-08-29 |
+| Reddit | 2 | Old/regular HTML served | 2026-08-29 |
+| Indeed | 2 | Full page served | 2026-08-29 |
+| Walmart | 2 | Full page served | 2026-08-29 |
+| Zillow | 2 | Full page served | 2026-08-29 |
+| Wikipedia | 1 | Static, trivial | 2026-08-29 |
+| Hacker News | 1 | Static, trivial | 2026-08-29 |
+
+Some of these later turned walled (Reddit and Indeed below). The 2026-08-29
+rows show what the IP could reach that day, nothing more.
+
+## Wall known, dated
+
+| Target | Wall | Date |
 |---|---|---|
-| playwright (plain) | Blocked by eBay | Detected immediately |
-| cloakbrowser (C++ source patches) | Blocked by eBay | Good tool, IP was already flagged; fonts needed (installed) |
-| scrapling StealthySession (patchright) | Blocked by eBay + SO | Best tier-3 addition (auto-cloudflare), but not magic; hard JS challenges win |
-| curl_cffi | WORKS tier 2 | The workhorse — verified 8 sites |
+| eBay | Akamai "Pardon Our Interruption". After a burst of about 10 probes the home IP was flagged and every tool failed, including the homepage | 2026-08-29 |
+| Etsy | 403 CAPTCHA page, 779 bytes | 2026-08-29 |
+| Booking | 202 challenge page | 2026-08-29 |
+| IMDb | 202 challenge page | 2026-08-29 |
+| Stack Overflow | Cloudflare "Just a moment" JS challenge. scrapling's cloudflare solve did not crack it | 2026-08-29 |
+| Google Jobs vertical (`udm=8`) | Plain HTTP returned a 91 KB JavaScript shell with 0 job postings. Client-rendered, nothing in the body | 2026-09-07 |
+| Indeed | 403 across the whole stack: datacenter curl (Cloudflare), local headless Chromium, and both proxy tiers | 2026-09-07 |
+| Reddit | Cloudflare / DataDome wall observed during actor builds | 2026-09-07 to 2026-09-09 |
+| Google | All bot challenge tiers returned `/sorry/` CAPTCHA. Unblocker and residential proxies included | 2026-09-09 |
+| Amazon Seller Central | Cloudflare / PerimeterX / DataDome wall | 2026-09-07 to 2026-09-09 |
 
-## Hard-won lessons (from 14:00-14:15 testing)
+JS-shell pages are the quiet failure mode. Google Jobs returned a 91 KB shell
+with HTTP 200 and zero listings, which a naive check reads as success. This is
+why `run` now asserts a row count and `verify` fails on an empty result.
 
-1. **IP reputation is the real gate.** eBay flagged our home IP after ~10 probes in an hour. Once flagged, EVERY tool fails (even homepage). Probe gently, rate-limit, don't burn targets.
-2. **Never promise a site without probing it first.** The probe-first flow is not optional — it's the product.
-3. **Tier 3 is an arms race.** JS-proof challenges (Akamai POTI, Cloudflare managed) beat every open-source tool from a single IP. Residential proxy + rotation is the only reliable answer, and that's a cost/scale decision per order.
+## Proxies change the calculus, at a cost
 
-## Honest delivery promises (grounded in this matrix)
+UNBLOCKER and residential proxy tiers get past some of the walls above, but
+results still vary (Indeed 403 through both HTTP proxy tiers, Google still
+`/sorry/`). Proxies cost money and are a per-job decision, never a default in
+scrapeforge. Tier 3 with a good residential proxy is the only reliable answer
+for the hardest walls, and even that is an ongoing arms race.
 
-- "Most public sites" + named examples (AliExpress, eBay, Reddit, Indeed,
-  Walmart, Zillow, Wikipedia, HN)
-- "I'll probe your target first and tell you honestly if it's reachable"
-- No Amazon scraping (stated in FAQ)
-- Tier 3 (Etsy/Booking/IMDB/SO) possible with browser emulation — discuss
-  per-order, never a blanket promise
+## Tier-3 tooling status (tested 2026-08-29)
 
-## Caveats
-
-- Results are IP- and time-dependent. Datacenter IPs (VPS/proxy) get blocked
-  more aggressively than home IPs. Home IP + delays = best odds.
-- Rate limits: AliExpress-style sites challenge after bursts. scrapeforge
-  rate_limit_sec config + probe-first flow handles this.
-- Re-verify per order: `python3 -m scrapeforge probe <url>` before promising.
-
-## Added 15:29 (Karl: check HN + 4chan)
-
-| Site | Tier | Verdict |
+| Tool | Result | Note |
 |---|---|---|
-| Hacker News | 1 | ✅ 3 pages / 90 items (titles, URLs, scores) |
-| 4chan /g/ | 2 | ✅ 15 threads (subjects + bodies), JSON output |
+| `playwright` plain | Blocked by eBay | Detected immediately |
+| `cloakbrowser` | Blocked by eBay | Good tool, but the IP was already flagged by then |
+| `scrapling` StealthySession | Blocked by eBay and Stack Overflow | Best tier-3 option (auto cloudflare), still not magic |
+| `curl_cffi` | Works as tier 2 | The workhorse |
 
-Both added as example configs: examples/hn-front.yaml, examples/4chan-g.yaml.
+## Hard-won lessons
+
+1. IP reputation is the real gate. eBay flagged the home IP after about 10 probes in an hour, then every tool failed. Probe gently, rate-limit, do not burn targets.
+2. Never promise a site without probing it first. Probe-first is the product, not an option.
+3. Tier 3 is an arms race. Managed JS challenges beat every open-source tool from a single IP. Residential proxy rotation is the reliable answer, and that is a cost and scale decision per job.
+4. Exit code 0 with zero rows is not success. Verify by data.
+
+## Re-verify per job
+
+```bash
+python3 -m scrapeforge probe <url>              # tier + confidence + note
+python3 -m scrapeforge probe <url> --fail-blocked   # exit 3 when walled
+```

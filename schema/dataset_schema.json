@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "scrapeforge dataset contract",
+  "description": "Machine-readable contract for every dataset scrapeforge writes. One row per extracted item. Field names for item records come from the config's `fields:` block; probes and pagination probes emit fixed fields. Only fields the code actually emits are listed.",
+  "version": "0.2.0",
+  "updated": "2026-09-11",
+  "datasets": {
+    "item_records": {
+      "produced_by": "scrapeforge run <config.yaml>",
+      "formats": ["csv", "json", "jsonl"],
+      "row_unit": "one matched item from items.selector",
+      "fields": {
+        "type": "object",
+        "description": "Keyed by the field names in the config's `fields:` block. Every value is a string. Missing element or attribute resolves to the empty string, never null.",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "views": {
+        "hn-front": {
+          "formats": ["csv"],
+          "fields": {
+            "title": { "type": "string", "source": "span.titleline a (text)" },
+            "url": { "type": "string", "source": "span.titleline a (href)" },
+            "score": { "type": "string", "source": "span.score (text, scope: global)" }
+          }
+        },
+        "aliexpress-led-strips": {
+          "formats": ["csv"],
+          "fields": {
+            "title": { "type": "string", "source": "div.title (text)" },
+            "price": { "type": "string", "source": "span.price-current (text)" },
+            "url": { "type": "string", "source": "a (href)" }
+          }
+        },
+        "4chan-g": {
+          "formats": ["json"],
+          "fields": {
+            "subject": { "type": "string", "source": "span.subject (text)" },
+            "body": { "type": "string", "source": "blockquote (text)" },
+            "replies": { "type": "string", "source": "div.posts (text)" }
+          }
+        }
+      }
+    },
+    "probe_records": {
+      "produced_by": "scrapeforge batchprobe <urls.txt> --out results.csv",
+      "format": "csv",
+      "row_unit": "one probed URL",
+      "fields": {
+        "tier": { "type": "integer", "values": [1, 2, 3, 9], "description": "1 plain HTTP, 2 TLS impersonation, 3 browser escalation, 9 both fetches failed" },
+        "status": { "type": "integer", "description": "HTTP status code, 0 when the fetch failed" },
+        "bytes": { "type": "integer", "description": "response body size in bytes" },
+        "confident": { "type": "boolean" },
+        "via": { "type": "string", "description": "httpx | curl_cffi | httpx-fail:<Exc> | unknown" },
+        "host": { "type": "string" },
+        "url": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "pagination_records": {
+      "produced_by": "scrapeforge pageprobe <urls.txt> --out matrix.csv",
+      "format": "csv",
+      "row_unit": "one probed URL",
+      "fields": {
+        "verdict": { "type": "string", "values": ["PAGINATED_OK", "NO_NEXT_LINK", "BLOCKED_AT_DEPTH", "NO_CONTENT_CHANGE", "ERROR"] },
+        "tier": { "type": "integer" },
+        "status": { "type": "integer" },
+        "host": { "type": "string" },
+        "url": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "scrapeforge run contract",
+  "description": "Output contract for `scrapeforge run`. A run is only a success when it extracts at least min_rows records. Exit codes are part of the contract: 0 with rows, 2 when the result is empty or under min_rows.",
+  "version": "0.2.0",
+  "updated": "2026-09-11",
+  "command": "scrapeforge run <config.yaml> --out <dataset> [--min-rows N] [--sample N]",
+  "exit_codes": {
+    "0": "at least min-rows records written",
+    "1": "config or I/O error",
+    "2": "fewer than min-rows records (an empty result fails loudly)"
+  },
+  "artifacts": [
+    {
+      "path": "--out value (default out.csv)",
+      "format": "csv | json | jsonl (config `output:` key)",
+      "schema": "schema/dataset_schema.json#/datasets/item_records"
+    }
+  ],
+  "stdout": [
+    "[saved] <path> (<n> rows)"
+  ],
+  "stderr": [
+    "[probe] <url> -> tier <t> (<note>)",
+    "[done] <pages> pages, <n> unique items",
+    "[verify] <path>: <n> row(s), minimum <min>",
+    "[verify] sample (<k>):",
+    "  <json record>",
+    "[verify] OK | [verify] FAIL: <reason>"
+  ]
+}
