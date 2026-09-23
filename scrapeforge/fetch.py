@@ -11,7 +11,12 @@ from __future__ import annotations
 
 def fetch(url: str, tier: int, timeout: int = 30, proxy: str | None = None,
           cookies: dict | None = None) -> tuple[int, str]:
-    """Returns (status_code, html). Raises FetchError on hard failure."""
+    """Returns (status_code, html). Raises FetchError on hard failure.
+
+    file:// URLs read a saved page from disk (any tier), so a config can be
+    developed against a page saved once with `scrapeforge fetch`."""
+    if url.startswith("file://"):
+        return _read_file(url)
     if tier == 1:
         return _fetch_httpx(url, timeout, proxy, cookies)
     if tier == 2:
@@ -21,6 +26,25 @@ def fetch(url: str, tier: int, timeout: int = 30, proxy: str | None = None,
 
 class FetchError(RuntimeError):
     pass
+
+
+def _read_file(url: str) -> tuple[int, str]:
+    from urllib.parse import unquote, urlparse
+    path = unquote(urlparse(url).path)
+    try:
+        with open(path, encoding="utf-8", errors="replace") as f:
+            return 200, f.read()
+    except FileNotFoundError:
+        return 404, ""
+
+
+def to_url(target: str) -> str:
+    """A URL stays a URL; an existing local path becomes a file:// URL."""
+    import os
+    from pathlib import Path
+    if "://" not in target and os.path.exists(target):
+        return Path(target).resolve().as_uri()
+    return target
 
 
 def _fetch_httpx(url, timeout, proxy, cookies) -> tuple[int, str]:

@@ -7,13 +7,12 @@ import sys
 import yaml
 
 from . import batchprobe, pageprobe
+from .api import scrape
 from .classify import probe
-from .extract import extract_items
-from .fetch import fetch
 from .output import write
-from .paginate import paginate
-from .verify import (EXIT_EMPTY, print_report, verify_file,
-                     verify_records)
+from .since import diff_rows
+from .verify import (EXIT_EMPTY, EXIT_ERROR, print_report, read_records,
+                     verify_file, verify_records)
 
 EXIT_BLOCKED = 3
 
@@ -28,6 +27,13 @@ def cmd_probe(args):
     print(f"markers:  {res.markers}")
     if res.note:
         print(f"note:     {res.note}")
+    for e in res.embedded:
+        detail = e.get("types") or ", ".join(
+            f"{path} ({n})" for path, n in e.get("lists", []))
+        print(f"json:     {e['source']}: {detail or 'present'}")
+    if res.embedded:
+        print("          -> items: {json: <source>, path: ...} reads these "
+              "without a browser (see docs/selectors.md)")
     # --fail-blocked makes the probe path usable in scripts: a walled target
     # is a loud non-zero exit, not a silent success.
     if args.fail_blocked and (res.tier >= 3 or not res.confident):
@@ -37,47 +43,47 @@ def cmd_probe(args):
 
 
 def cmd_run(args):
-    with open(args.config, encoding="utf-8") as f:
-        cfg = yaml.safe_load(f)
+    try:
+        result = scrape(args.config, log=sys.stderr)
+    except (OSError, ValueError, KeyError, yaml.YAMLError) as e:
+        print(f"[run] config error: {type(e).__name__}: {e}", file=sys.stderr)
+        sys.exit(EXIT_ERROR)
+    cfg, rows = result.config, result.rows
 
-    tier = cfg.get("tier", "auto")
-    if tier == "auto":
-        res = probe(cfg["url"])
-        tier = res.tier
-        print(f"[probe] {cfg['url']} -> tier {tier} "
-              f"({res.note})", file=sys.stderr)
-
-    rows: list[dict] = []
-    dedup = set()
-
-    def on_page(html):
-        for item in extract_items(html, cfg["items"]["selector"],
-                                  cfg["fields"]):
-            key = json_dump(item)
-            if key in dedup:
-                continue
-            dedup.add(key)
-            rows.append(item)
-
-    pages = paginate(
-        lambda u: fetch(u, tier, timeout=cfg.get("timeout", 30),
-                        proxy=cfg.get("proxy"),
-                        cookies=cfg.get("cookies")),
-        cfg["url"], cfg, on_page,
-    )
-    print(f"[done] {pages} pages, {len(rows)} unique items", file=sys.stderr)
-
-    out = args.out or "out.csv"
-    write(rows, out, cfg.get("output", "csv"))
-    print(f"[saved] {out} ({len(rows)} rows)")
-
-    # Verify by data, not by exit code: assert the row count and show a
-    # sample. Empty output is a loud failure, not a quiet success.
+    # Verify by data, not by exit code: assert the row count on everything
+    # scraped (before --since filtering, so a quiet day with no new rows is
+    # not a failure but a broken selector still is).
     res = verify_records(rows, min_rows=args.min_rows, sample=args.sample,
-                         source=out)
+                         source=args.out)
+
+    out_rows = rows
+    if args.since:
+        try:
+            previous = read_records(args.since)
+        except FileNotFoundError:
+            previous = []
+            print(f"[since] {args.since} not found: every row is new",
+                  file=sys.stderr)
+        out_rows, counts = diff_rows(rows, previous, args.key)
+        print(f"[since] {counts['new']} new, {counts['changed']} changed, "
+              f"{counts['unchanged']} unchanged vs {args.since}",
+              file=sys.stderr)
+
+    write(out_rows, args.out, cfg.get("output", "csv"))
+    if args.snapshot:
+        write(rows, args.snapshot, _format_for(args.snapshot, cfg))
+        print(f"[snapshot] {args.snapshot} ({len(rows)} rows)", file=sys.stderr)
+    saved = f"[saved] {args.out} ({len(out_rows)} rows)"
+    print(saved, file=sys.stderr if args.out == "-" else sys.stdout)
+
     print_report(res, stream=sys.stderr)
     if not res.ok:
         sys.exit(EXIT_EMPTY)
+
+
+def _format_for(path: str, cfg: dict) -> str:
+    ext = path.rsplit(".", 1)[-1].lower() if "." in path else ""
+    return ext if ext in ("csv", "json", "jsonl") else cfg.get("output", "csv")
 
 
 def cmd_verify(args):
@@ -86,11 +92,6 @@ def cmd_verify(args):
     print_report(res)
     if not res.ok:
         sys.exit(EXIT_EMPTY)
-
-
-def json_dump(item):
-    import json
-    return json.dumps(item, ensure_ascii=False, sort_keys=True)
 
 
 def main(argv=None):
@@ -113,11 +114,21 @@ def main(argv=None):
 
     p_run = sub.add_parser("run", help="run a YAML scrape config")
     p_run.add_argument("config")
-    p_run.add_argument("--out", default=None)
+    p_run.add_argument("--out", default="out.csv",
+                       help="dataset path, or - for stdout (default out.csv)")
     p_run.add_argument("--min-rows", type=int, default=1,
                        help="fail if fewer rows are extracted (default 1)")
     p_run.add_argument("--sample", type=int, default=3,
                        help="records to print as a sample (default 3)")
+    p_run.add_argument("--since", metavar="PREVIOUS",
+                       help="only output rows new or changed vs this earlier "
+                            "dataset (adds a _change column)")
+    p_run.add_argument("--key", action="append", metavar="FIELD",
+                       help="field(s) identifying a row for --since "
+                            "(repeatable; default: the whole row)")
+    p_run.add_argument("--snapshot", metavar="PATH",
+                       help="also write every scraped row here; pass the "
+                            "same path as --since to keep a rolling state file")
     p_run.set_defaults(func=cmd_run)
 
     p_verify = sub.add_parser(

@@ -7,7 +7,7 @@ Tier 3: full browser needed (CloakBrowser/Playwright stealth) — Amazon-class.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 CHALLENGE_MARKERS = [
     "captcha", "recaptcha", "turnstile", "hcaptcha", "access denied",
@@ -32,6 +32,9 @@ class ProbeResult:
     confident: bool    # False when the signal is ambiguous
     markers: list[str]
     note: str = ""
+    # Embedded JSON found in the body (see embedded.discover); only filled
+    # by probe(), not by classify_response().
+    embedded: list[dict] = field(default_factory=list)
 
 
 def _markers_hit(text: str) -> list[str]:
@@ -88,11 +91,24 @@ def classify_response(url: str, status: int, text: str) -> ProbeResult:
 
 def probe(url: str, timeout: int = 25) -> ProbeResult:
     """Fetch once and classify. Tries plain first, then TLS impersonation."""
+    res = _probe(url, timeout)
+    body = getattr(res, "_body", "")
+    if body:
+        from .embedded import discover
+        try:
+            res.embedded = discover(body)
+        except Exception:  # noqa: BLE001 - discovery is a hint, never fatal
+            res.embedded = []
+    return res
+
+
+def _probe(url: str, timeout: int) -> ProbeResult:
     try:
         import httpx
         r = httpx.get(url, timeout=timeout, follow_redirects=True,
                       headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
         res = classify_response(url, r.status_code, r.text)
+        res._body = r.text
         if res.tier <= 1:
             return res
     except Exception as e:
@@ -108,6 +124,7 @@ def probe(url: str, timeout: int = 25) -> ProbeResult:
             res2 = ProbeResult(res2.url, res2.status, res2.body_size, 2,
                                res2.confident, res2.markers,
                                "served via TLS impersonation (curl_cffi)")
+        res2._body = r.text
         if res2.tier < res.tier or res2.confident:
             return res2
     except Exception as e:
