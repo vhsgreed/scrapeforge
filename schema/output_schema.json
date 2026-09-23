@@ -1,31 +1,41 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "scrapeforge run contract",
-  "description": "Output contract for `scrapeforge run`. A run is only a success when it extracts at least min_rows records. Exit codes are part of the contract: 0 with rows, 2 when the result is empty or under min_rows.",
-  "version": "0.2.0",
-  "updated": "2026-09-11",
-  "command": "scrapeforge run <config.yaml> --out <dataset> [--min-rows N] [--sample N]",
+  "description": "Output contract for `scrapeforge run`. A run is only a success when it extracts at least min_rows records (counted before any --since filtering). Exit codes are part of the contract.",
+  "version": "0.3.0",
+  "updated": "2026-09-23",
+  "command": "scrapeforge run <config.yaml> [--out <dataset>|-] [--min-rows N] [--sample N] [--since PREV] [--key FIELD]... [--snapshot PATH]",
   "exit_codes": {
-    "0": "at least min-rows records written",
-    "1": "config or I/O error",
-    "2": "fewer than min-rows records (an empty result fails loudly)"
+    "0": "at least min-rows records scraped",
+    "1": "config, I/O or fetch error",
+    "2": "fewer than min-rows records scraped (an empty result fails loudly)"
   },
   "artifacts": [
     {
-      "path": "--out value (default out.csv)",
+      "path": "--out value (default out.csv); - writes the dataset to stdout",
       "format": "csv | json | jsonl (config `output:` key)",
-      "schema": "schema/dataset_schema.json#/datasets/item_records"
+      "schema": "schema/dataset_schema.json#/datasets/item_records",
+      "rows": "every scraped row, or with --since only new/changed rows plus a `_change` column"
+    },
+    {
+      "path": "--snapshot value, when given",
+      "format": "inferred from the extension, else the config `output:` key",
+      "schema": "schema/dataset_schema.json#/datasets/item_records",
+      "rows": "every scraped row (no `_change` column)"
     }
   ],
   "stdout": [
-    "[saved] <path> (<n> rows)"
+    "[saved] <path> (<n> rows)   (on stderr instead when --out -)"
   ],
   "stderr": [
-    "[probe] <url> -> tier <t> (<note>)",
+    "[probe] <url> -> tier <t> (<note>)   (tier: auto only)",
     "[done] <pages> pages, <n> unique items",
+    "[since] <n> new, <n> changed, <n> unchanged vs <PREV>",
+    "[snapshot] <path> (<n> rows)",
     "[verify] <path>: <n> row(s), minimum <min>",
     "[verify] sample (<k>):",
     "  <json record>",
-    "[verify] OK | [verify] FAIL: <reason>"
+    "[verify] OK | [verify] FAIL: <reason>",
+    "[run] config error: <Exc>: <msg> | [run] fetch error: <Exc>: <msg>"
   ]
 }

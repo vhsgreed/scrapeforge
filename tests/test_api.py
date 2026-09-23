@@ -120,3 +120,13 @@ def test_diff_rows_without_key_compares_whole_row():
     out, counts = diff_rows(cur, prev)
     assert out == [{"a": 1, "b": 3, "_change": "new"}]
     assert counts == {"new": 1, "changed": 0, "unchanged": 1}
+
+
+def test_fetch_error_exits_1_without_traceback(tmp_path, capsys):
+    cfg = dict(CFG, url="http://127.0.0.1:9/", tier=1)
+    path = tmp_path / "c.json"
+    path.write_text(json.dumps(cfg))
+    with pytest.raises(SystemExit) as e:
+        cli.main(["run", str(path), "--out", str(tmp_path / "o.csv")])
+    assert e.value.code == 1
+    assert "[run] fetch error" in capsys.readouterr().err

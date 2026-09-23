@@ -48,6 +48,9 @@ def cmd_run(args):
     except (OSError, ValueError, KeyError, yaml.YAMLError) as e:
         print(f"[run] config error: {type(e).__name__}: {e}", file=sys.stderr)
         sys.exit(EXIT_ERROR)
+    except Exception as e:  # noqa: BLE001 - network/TLS errors from any tier
+        print(f"[run] fetch error: {type(e).__name__}: {e}", file=sys.stderr)
+        sys.exit(EXIT_ERROR)
     cfg, rows = result.config, result.rows
 
     # Verify by data, not by exit code: assert the row count on everything
