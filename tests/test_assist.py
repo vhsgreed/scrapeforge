@@ -139,3 +139,16 @@ def test_fetch_saves_file(tmp_path, capsys):
     out = tmp_path / "saved.html"
     cli.main(["fetch", os.path.join(FIX, "shop.html"), "--out", str(out)])
     assert out.read_text() == page("shop.html")
+
+
+def test_plain_var_array_beats_analytics_datalayer():
+    # quotes.toscrape.com/js/ shape: `var data = [...]` rendered by
+    # document.write, plus a smaller window.dataLayer earlier on the page.
+    html = page("quotes-js.html")
+    s = suggest(html)
+    assert s.items == {"json": "var:data"}
+    assert s.paginate == {"selector": "li.next a"}
+    rows = rows_for(html, s)
+    assert len(rows) == 3
+    assert rows[0]["author_name"] == "Albert Einstein"
+    assert rows[0]["tags"] == "change, world" and rows[2]["tags"] == ""

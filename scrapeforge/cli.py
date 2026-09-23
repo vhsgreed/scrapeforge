@@ -29,7 +29,7 @@ def cmd_probe(args):
         print(f"note:     {res.note}")
     for e in res.embedded:
         detail = e.get("types") or ", ".join(
-            f"{path} ({n})" for path, n in e.get("lists", []))
+            f"{path or '(top level)'} ({n})" for path, n in e.get("lists", []))
         print(f"json:     {e['source']}: {detail or 'present'}")
     if res.embedded:
         print("          -> items: {json: <source>, path: ...} reads these "

@@ -302,28 +302,39 @@ def guess_pagination(soup: BeautifulSoup) -> dict | None:
 
 
 def guess_json_config(html: str) -> tuple[dict, dict] | None:
-    """items/fields for the biggest embedded JSON list, if there is one."""
-    for found in discover(html):
-        src = found["source"]
-        if src == "ld+json":
-            types = found["types"]
-            best = max(types, key=types.get)
-            objs = [o for o in load_documents(html, src)
-                    if isinstance(o, dict) and o.get("@type") == best]
-            if len(objs) < 2 and best != "ItemList":
-                continue
-            items = {"json": src, "where": {"@type": best}}
-            if best == "ItemList":
-                items["path"] = "itemListElement.*.item"
-                objs = [o for d in objs for o in get_path(d, "itemListElement.*.item")]
-            return items, _json_fields(objs)
-        if found.get("lists"):
-            path, _ = found["lists"][0]
-            docs = load_documents(html, src)
-            objs = [o for d in docs for o in get_path(d, path)]
-            objs = [x for o in objs for x in (o if isinstance(o, list) else [o])]
-            return {"json": src, "path": path}, _json_fields(objs)
-    return None
+    """items/fields for the biggest embedded JSON list, if there is one.
+
+    JSON-LD wins when it holds several objects of one type (it is the
+    site's own structured data); otherwise the longest list of objects in
+    any other source, so a 30-item product array beats an analytics
+    `dataLayer` that happens to come first on the page."""
+    found = discover(html)
+    for f in found:
+        if f["source"] != "ld+json":
+            continue
+        types = f["types"]
+        best = max(types, key=types.get)
+        objs = [o for o in load_documents(html, "ld+json")
+                if isinstance(o, dict) and o.get("@type") == best]
+        if len(objs) < 2 and best != "ItemList":
+            break
+        items = {"json": "ld+json", "where": {"@type": best}}
+        if best == "ItemList":
+            items["path"] = "itemListElement.*.item"
+            objs = [o for d in objs for o in get_path(d, "itemListElement.*.item")]
+        return items, _json_fields(objs)
+
+    candidates = [(n, f["source"], path) for f in found if f.get("lists")
+                  for path, n in f["lists"]]
+    if not candidates:
+        return None
+    _, src, path = max(candidates, key=lambda c: c[0])
+    objs = [o for d in load_documents(html, src) for o in get_path(d, path)]
+    objs = [x for o in objs for x in (o if isinstance(o, list) else [o])]
+    items = {"json": src}
+    if path:
+        items["path"] = path
+    return items, _json_fields(objs)
 
 
 def _json_fields(objs: list) -> dict:
@@ -346,13 +357,19 @@ def _json_fields(objs: list) -> dict:
                 for kk, vv in v.items():
                     if not kk.startswith("@"):
                         note(f"{k}.{kk}", vv)
+            elif isinstance(v, list):
+                if all(isinstance(x, (str, int, float)) for x in v):
+                    counts[f"{k}.*"] += 1        # ["a", "b"] -> "a, b"
+                    kinds[f"{k}.*"].add("list")
             else:
                 note(k, v)
     fields = {}
     for path, _ in counts.most_common(8):
         name = re.sub(r"[^a-z0-9]+", "_", path.lower()).strip("_")
         spec = {"path": path}
-        if kinds[path] == {"int"}:
+        if "list" in kinds[path]:
+            spec["all"] = True
+        elif kinds[path] == {"int"}:
             spec["type"] = "int"
         elif kinds[path] <= {"int", "float"}:
             spec["type"] = "float"

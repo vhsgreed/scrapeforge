@@ -151,11 +151,16 @@ def discover(html: str) -> list[dict]:
         if docs:
             found.append({"source": src, "count": 1,
                           "lists": _biggest_lists(docs[0])})
-    for name in set(re.findall(r"window\.(__[A-Z0-9_]+__)\s*=", html)):
+    names = re.findall(r"(?:window\.|\bvar\s+|\blet\s+|\bconst\s+)"
+                       r"([A-Za-z_$][\w$]*)\s*=\s*(?:JSON\.parse\(|[\[{])", html)
+    for name in dict.fromkeys(names):  # dedupe, keep page order
         docs = load_documents(html, f"var:{name}")
-        if docs:
-            found.append({"source": f"var:{name}", "count": 1,
-                          "lists": _biggest_lists(docs[0])})
+        lists = _biggest_lists(docs[0]) if docs else []
+        if isinstance(docs[0] if docs else None, list) and len(docs[0]) >= 2 \
+                and all(isinstance(x, dict) for x in docs[0][:5]):
+            lists.insert(0, ("", len(docs[0])))   # the variable is the list
+        if lists:
+            found.append({"source": f"var:{name}", "count": 1, "lists": lists})
     return found
 
 

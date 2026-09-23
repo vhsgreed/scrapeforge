@@ -28,8 +28,8 @@ jobs:
           - config: examples/quotes-js.yaml
             min_rows: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: pip install -e .
@@ -46,4 +46,40 @@ jobs:
             echo '```'
             tail -n 12 /tmp/log 2>/dev/null || echo "no log"
             echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # The new-user path: `init` a config from scratch, then `run` it.
+  init:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - url: https://books.toscrape.com/catalogue/page-1.html
+            min_rows: 60
+          - url: https://quotes.toscrape.com/
+            min_rows: 30
+          - url: https://quotes.toscrape.com/js/
+            min_rows: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: init + run ${{ matrix.url }}
+        run: |
+          set -o pipefail
+          cd "$RUNNER_TEMP"
+          scrapeforge init "${{ matrix.url }}" --name site 2>&1 | tee init.log
+          scrapeforge run site.yaml --out out.csv --min-rows ${{ matrix.min_rows }} \
+            --sample 2 2>&1 | tee run.log
+      - name: summary
+        if: always()
+        run: |
+          cd "$RUNNER_TEMP"
+          {
+            echo "### init ${{ matrix.url }}"
+            echo '```yaml'; cat site.yaml 2>/dev/null || echo "no config"; echo '```'
+            echo '```'; cat init.log run.log 2>/dev/null | tail -n 25; echo '```'
           } >> "$GITHUB_STEP_SUMMARY"

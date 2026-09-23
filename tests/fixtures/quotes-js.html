@@ -1,0 +1,42 @@
+<html><head><script>window.dataLayer = [{"event": "a"}, {"event": "b"}];</script></head><body>
+<div class="container"><div class="row header-box"><h1><a href="/">Quotes to Scrape</a></h1></div>
+<script src="/static/jquery.js"></script>
+<script>
+    var data = [
+    {
+        "tags": [
+            "change",
+            "world"
+        ],
+        "author": {
+            "name": "Albert Einstein",
+            "slug": "Albert-Einstein"
+        },
+        "text": "\u201cThe world as we have created it\u201d"
+    },
+    {
+        "tags": [
+            "abilities"
+        ],
+        "author": {
+            "name": "J.K. Rowling",
+            "slug": "J-K-Rowling"
+        },
+        "text": "\u201cIt is our choices\u201d"
+    },
+    {
+        "tags": [],
+        "author": {
+            "name": "Jane Austen",
+            "slug": "Jane-Austen"
+        },
+        "text": "\u201cThe person, be it gentleman or lady\u201d"
+    }
+];
+    for (var i in data) {
+        var d = data[i];
+        document.write('<div class="quote">' + d.text + '</div>');
+    }
+</script>
+<nav><ul class="pager"><li class="next"><a href="/js/page/2/">Next <span aria-hidden="true">&rarr;</span></a></li></ul></nav>
+</div></body></html>
