@@ -48,3 +48,11 @@ def test_all_joins_every_match_and_types_apply():
     assert rows == [{"tags": "py, web", "tags_pipe": "py|web", "price": 1200,
                      "img": "/i.png", "html": "Price: $1,200",
                      "missing": None}]
+
+
+@pytest.mark.parametrize("raw,want", [
+    ("1.299,50 kr", 1299.5), ("12,5 %", 12.5), ("1 299,00 €", 1299.0),
+    ("€ 3.000", 3000.0),
+])
+def test_decimal_comma(raw, want):
+    assert clean(raw, {"type": "float", "decimal": ","}) == want

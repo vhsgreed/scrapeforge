@@ -3,28 +3,38 @@ from __future__ import annotations
 
 import json
 import re
+from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
 from .embedded import get_path, items_from_json
 
-_NUMBER = re.compile(r"-?\d[\d,'  ]*(?:\.\d+)?")
+_NUMBER = re.compile(r"-?\d[\d,'\u00a0\u202f]*(?:\.\d+)?")
 
 
-def extract_page(html: str, cfg: dict) -> list[dict]:
+def extract_page(html: str, cfg: dict, page_url: str | None = None) -> list[dict]:
     """Records for one page, per the config's `items:` and `fields:` blocks.
 
     items.selector -> CSS mode: fields use selector/attr/scope.
     items.json     -> embedded JSON mode: fields use path.
-    Either way, fields may add regex/strip/type/default post-processing.
+    Either way, fields may add regex/strip/type/default post-processing, and
+    `absolute: true` resolves a relative link against page_url.
     """
     items_cfg = cfg["items"]
     fields = cfg["fields"]
     if "json" in items_cfg:
-        return [{name: clean(_json_value(obj, spec), spec)
+        rows = [{name: clean(_json_value(obj, spec), spec)
                  for name, spec in fields.items()}
                 for obj in items_from_json(html, items_cfg)]
-    return extract_items(html, items_cfg["selector"], fields)
+    else:
+        rows = extract_items(html, items_cfg["selector"], fields)
+    absolute = [n for n, spec in fields.items() if spec.get("absolute")]
+    if page_url and absolute:
+        for row in rows:
+            for name in absolute:
+                if isinstance(row[name], str) and row[name]:
+                    row[name] = urljoin(page_url, row[name])
+    return rows
 
 
 def extract_items(html: str, item_selector: str,
@@ -112,6 +122,7 @@ def clean(value, spec: dict):
       no match means missing.
     - type: str (default) | int | float. Numbers are read from the first
       number in the text: "£1,299.00" -> 1299.0, "10 points" -> 10.
+    - decimal: "," reads European numbers: "1.299,50 kr" -> 1299.5.
     - default: value for a missing or unparseable field. Without it, a
       missing str field is "" and a missing number is null (empty in CSV).
     """
@@ -143,9 +154,13 @@ def clean(value, spec: dict):
     if typ == "str":
         return text if (text or not has_default) else missing
     if typ in ("int", "float"):
+        if spec.get("decimal") == ",":
+            # 1.299,50 -> 1299.50: drop grouping marks, comma becomes the point.
+            text = re.sub(r"(?<=\d)[.\s\u00a0\u202f'](?=\d{3}\b)", "", text)
+            text = re.sub(r"(?<=\d),(?=\d)", ".", text)
         m = _NUMBER.search(text)
         if not m:
             return missing
-        num = float(re.sub(r"[,'  ]", "", m.group(0)))
+        num = float(re.sub(r"[,'\u00a0\u202f]", "", m.group(0)))
         return int(num) if typ == "int" else num
     raise ValueError(f"unknown field type: {typ!r} (use str, int or float)")

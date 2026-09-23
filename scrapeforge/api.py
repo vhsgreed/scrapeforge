@@ -74,9 +74,15 @@ def scrape(config: str | dict, *, tier: int | None = None,
 
     rows: list[dict] = []
     seen: set[str] = set()
+    current = {"url": cfg["url"]}
+    base_fetcher = fetcher
+
+    def fetcher(u):  # noqa: F811 - wraps the chosen fetcher to track the page URL
+        current["url"] = u
+        return base_fetcher(u)
 
     def on_page(html):
-        for item in extract_page(html, cfg):
+        for item in extract_page(html, cfg, current["url"]):
             key = json.dumps(item, ensure_ascii=False, sort_keys=True,
                              default=str)
             if key not in seen:

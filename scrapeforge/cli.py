@@ -1,4 +1,4 @@
-"""CLI: probe, batchprobe, pageprobe, run, verify."""
+"""CLI: init, try, fetch, probe, batchprobe, pageprobe, run, verify."""
 from __future__ import annotations
 
 import argparse
@@ -6,7 +6,7 @@ import sys
 
 import yaml
 
-from . import batchprobe, pageprobe
+from . import assist, batchprobe, pageprobe
 from .api import scrape
 from .classify import probe
 from .output import write
@@ -111,6 +111,21 @@ def main(argv=None):
     p_page = sub.add_parser("pageprobe", help="certify pagination advances -> CSV")
     pageprobe.add_arguments(p_page)
     p_page.set_defaults(func=pageprobe.run)
+
+    p_init = sub.add_parser(
+        "init", help="guess a config from a listing page and preview it")
+    assist.add_init_arguments(p_init)
+    p_init.set_defaults(func=assist.run_init)
+
+    p_try = sub.add_parser(
+        "try", help="test a CSS selector against a page or saved file")
+    assist.add_try_arguments(p_try)
+    p_try.set_defaults(func=assist.run_try)
+
+    p_fetch = sub.add_parser(
+        "fetch", help="save a page's HTML (what scrapeforge sees) to a file")
+    assist.add_fetch_arguments(p_fetch)
+    p_fetch.set_defaults(func=assist.run_fetch)
 
     p_run = sub.add_parser("run", help="run a YAML scrape config")
     p_run.add_argument("config")
