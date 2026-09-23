@@ -26,6 +26,8 @@ jobs:
           path: docs/demo.tape
       - name: commit the recording
         run: |
+          ls -la /tmp/scrapeforge-demo.gif
+          cp /tmp/scrapeforge-demo.gif docs/demo.gif
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/demo.gif
