@@ -64,17 +64,26 @@ def classify_response(url: str, status: int, text: str) -> ProbeResult:
         return ProbeResult(url, status, size, 3, True, markers,
                            f"blocked: {block or 'challenge'}")
 
-    # Full-size body with real page markers = fine via TLS impersonation.
-    # Akamai-class sites (AliExpress) only pass with curl_cffi.
-    if size > 50000 and (block or markers or "punish" in text.lower()):
+    # Full-size body with a hard block signature = real page that only
+    # passes with TLS impersonation (Akamai-class, e.g. AliExpress). Generic
+    # words alone ("challenge", "captcha" in a form) are not enough on a
+    # full-size page: that is how ordinary content gets needlessly escalated.
+    if size >= 20000 and (block or "punish" in text.lower()):
         return ProbeResult(url, status, size, 2, True, markers,
                            "real page served, TLS impersonation recommended")
 
-    # Static HTML with no challenge markers: tier 1 is enough.
-    # Small pages (like example.com) are fine too, as long as the body is
-    # clean and we got it via plain HTTP in the probe.
-    if not markers and not block:
-        return ProbeResult(url, status, size, 1, True, [], "static page")
+    # Any other error status is not a working static page, whatever the body
+    # looks like. Not confident: the next tier may or may not fix it.
+    if status >= 400 or status == 0:
+        return ProbeResult(url, status, size, 2, False, markers,
+                           f"http {status}: not a usable page via plain HTTP")
+
+    # Static HTML with a 2xx/3xx status and no hard block signature: tier 1.
+    # Weak markers on a full-size page are reported but do not escalate.
+    note = "static page"
+    if markers:
+        note += f" (weak challenge words ignored: {', '.join(markers)})"
+    return ProbeResult(url, status, size, 1, True, markers, note)
 
 
 def probe(url: str, timeout: int = 25) -> ProbeResult:

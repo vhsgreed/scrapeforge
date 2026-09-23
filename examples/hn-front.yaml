@@ -12,5 +12,5 @@ items:
 fields:
   title: { selector: "span.titleline a", attr: text }
   url:   { selector: "span.titleline a", attr: href }
-  score: { selector: "span.score", attr: text, scope: global }
+  score: { selector: "span.score", attr: text, scope: next }
 output: csv

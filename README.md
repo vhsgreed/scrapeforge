@@ -117,11 +117,11 @@ items:
 fields:
   title: { selector: "span.titleline a", attr: text }
   url:   { selector: "span.titleline a", attr: href }
-  score: { selector: "span.score", attr: text, scope: global }
+  score: { selector: "span.score", attr: text, scope: next }
 output: csv           # csv | json | jsonl
 ```
 
-Fields default to `scope: item` (the selector resolves inside each matched item). `scope: global` resolves against the whole document and pairs results by index, which is how the HN score column above is joined to its row.
+Fields default to `scope: item` (the selector resolves inside each matched item). `scope: next` resolves inside the item's next sibling element, which is how the HN score column above is joined to its row: HN puts the score in the row after the title. `scope: global` resolves against the whole document and pairs results by index; use it only when every item has exactly one match, because a single missing match (an HN job post has no score) shifts every later value onto the wrong row.
 
 ## Commands
 
@@ -179,7 +179,7 @@ Description and topics for the repository page (set via the GitHub API, or paste
 - `scrapeforge/batchprobe.py` concurrent multi-site classification
 - `scrapeforge/pageprobe.py` pagination certification
 - `scrapeforge/fetch.py` tier 1/2/3 fetchers, one import each
-- `scrapeforge/extract.py` CSS selector extraction (item and global scope)
+- `scrapeforge/extract.py` CSS selector extraction (item, next-sibling, and global scope)
 - `scrapeforge/paginate.py` config-driven pagination loop
 - `scrapeforge/output.py` CSV/JSON/JSONL writers
 - `scrapeforge/verify.py` row-count verification and exit codes

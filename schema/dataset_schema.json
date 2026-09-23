@@ -22,7 +22,7 @@
           "fields": {
             "title": { "type": "string", "source": "span.titleline a (text)" },
             "url": { "type": "string", "source": "span.titleline a (href)" },
-            "score": { "type": "string", "source": "span.score (text, scope: global)" }
+            "score": { "type": "string", "source": "span.score (text, scope: next)" }
           }
         },
         "aliexpress-led-strips": {
