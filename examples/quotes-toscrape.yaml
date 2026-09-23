@@ -1,0 +1,16 @@
+# Sandbox site built for scraping practice; checked daily.
+name: quotes-toscrape
+url: https://quotes.toscrape.com/
+tier: 1
+max_pages: 3
+rate_limit_sec: 1.0
+paginate:
+  selector: "li.next a"
+items:
+  selector: "div.quote"
+fields:
+  text:       { selector: "span.text", strip: " “”" }
+  author:     { selector: "small.author" }
+  author_url: { selector: "a[href*='/author/']", attr: href, absolute: true }
+  tags:       { selector: "a.tag", all: true, join: "|" }
+output: jsonl
