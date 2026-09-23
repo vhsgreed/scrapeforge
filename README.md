@@ -8,9 +8,11 @@ scrapeforge is a small, dependency-light Python scraper for public web pages. It
 
 ```bash
 git clone https://github.com/vhsgreed/scrapeforge && cd scrapeforge
-pip install -r requirements.txt
-python3 -m scrapeforge run examples/hn-front.yaml --out hn.csv
+pip install -e .
+scrapeforge run examples/hn-front.yaml --out hn.csv
 ```
+
+`pip install -e .` installs the `scrapeforge` command; `python3 -m scrapeforge` works the same way. `pip install -r requirements.txt` still works if you only want the dependencies. Add `.[tier3]` for the optional browser tier, `.[dev]` for pytest.
 
 The third command probes Hacker News, picks tier 1, follows the "More" link for up to 10 pages, writes `hn.csv`, and prints a sample of the rows it extracted.
 
@@ -147,7 +149,8 @@ python3 -m scrapeforge verify data.csv --min-rows 1 --sample 3
 
 Two layers:
 
-1. Config-driven pagination (`paginate.py`): the runner follows next-page links from the `paginate:` block until `max_pages` or no next link. `rate_limit_sec` inserts a pause between page fetches.
+1. Config-driven pagination (`paginate.py`): the runner follows next-page links from the `paginate:` block until `max_pages` or no next link. `rate_limit_sec` inserts a pause between page fetches. Next links resolve against the page they were found on, and the loop stops if a next link points back at a page it already fetched.
+
 2. Pagination certification (`pageprobe.py`): verifies that a target actually paginates before you rely on it, by fetching page 1, finding the next link, fetching page 2, and checking the visible text changed. Verdicts: `PAGINATED_OK`, `NO_NEXT_LINK`, `BLOCKED_AT_DEPTH`, `NO_CONTENT_CHANGE`, `ERROR`. Run it on the exact URLs a job needs (category pages, not homepages).
 
 ## What it will not do
@@ -184,6 +187,8 @@ Description and topics for the repository page (set via the GitHub API, or paste
 - `scrapeforge/output.py` CSV/JSON/JSONL writers
 - `scrapeforge/verify.py` row-count verification and exit codes
 - `scrapeforge/cli.py` probe, batchprobe, pageprobe, run, verify
+- `pyproject.toml` package metadata and the `scrapeforge` command
+- `.github/workflows/tests.yml` CI: pytest on Python 3.11-3.14
 - `schema/dataset_schema.json` record contract for every dataset
 - `schema/output_schema.json` run output and exit-code contract
 - `examples/hn-front.yaml` tier 1, paginated, verified live

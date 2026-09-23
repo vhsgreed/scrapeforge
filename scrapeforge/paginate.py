@@ -16,7 +16,8 @@ def paginate(get_html, base_url: str, cfg: dict, on_page) -> int:
     max_pages = min(cfg.get("max_pages", 10), 100)
     rate = cfg.get("rate_limit_sec", 2.0)
 
-    url = cfg["url"]
+    url = base_url
+    seen = {url}
     pages = 0
     from bs4 import BeautifulSoup
 
@@ -45,7 +46,12 @@ def paginate(get_html, base_url: str, cfg: dict, on_page) -> int:
         href = next_el.get(attr)
         if not href or href.startswith("javascript:"):
             break
-        url = urljoin(base_url, href)
+        # Resolve against the page the link came from, not the start URL:
+        # a relative "?page=3" on /cat/page/2/ must stay under /cat/page/2/.
+        url = urljoin(url, href)
+        if url in seen:  # next link points back at a page already fetched
+            break
+        seen.add(url)
         if rate:
             time.sleep(rate)
     return pages
