@@ -1,4 +1,4 @@
-"""CLI: probe and run."""
+"""CLI: probe, batchprobe, pageprobe, run, verify."""
 from __future__ import annotations
 
 import argparse
@@ -6,6 +6,7 @@ import sys
 
 import yaml
 
+from . import batchprobe, pageprobe
 from .classify import probe
 from .extract import extract_items
 from .fetch import fetch
@@ -33,25 +34,6 @@ def cmd_probe(args):
         print(f"[probe] FAIL: tier {res.tier}, not confidently reachable",
               file=sys.stderr)
         sys.exit(EXIT_BLOCKED)
-
-
-def _run_batch(args):
-    from .batchprobe import main as batch_main
-    import sys as _sys
-    _sys.argv = ["scrapeforge", *args.files, "--out", args.out,
-                 "--workers", str(args.workers)]
-    batch_main()
-
-
-def _run_page(args):
-    from .pageprobe import main as page_main
-    import sys as _sys
-    argv = ["scrapeforge", *args.files, "--out", args.out,
-            "--workers", str(args.workers)]
-    if args.tiers:
-        argv += ["--tiers", args.tiers]
-    _sys.argv = argv
-    page_main()
 
 
 def cmd_run(args):
@@ -121,18 +103,13 @@ def main(argv=None):
                          help="exit non-zero (3) when the target is walled")
     p_probe.set_defaults(func=cmd_probe)
 
-    p_batch = sub.add_parser("batchprobe", help="classify many sites (see batchprobe.py)")
-    p_batch.add_argument("files", nargs="+")
-    p_batch.add_argument("--out", default="probe-results.csv")
-    p_batch.add_argument("--workers", type=int, default=6)
-    p_batch.set_defaults(func=lambda a: _run_batch(a))
+    p_batch = sub.add_parser("batchprobe", help="classify many sites -> CSV")
+    batchprobe.add_arguments(p_batch)
+    p_batch.set_defaults(func=batchprobe.run)
 
-    p_page = sub.add_parser("pageprobe", help="pagination-advance matrix (see pageprobe.py)")
-    p_page.add_argument("files", nargs="+")
-    p_page.add_argument("--out", default="pagination-matrix.csv")
-    p_page.add_argument("--tiers", default=None)
-    p_page.add_argument("--workers", type=int, default=5)
-    p_page.set_defaults(func=lambda a: _run_page(a))
+    p_page = sub.add_parser("pageprobe", help="certify pagination advances -> CSV")
+    pageprobe.add_arguments(p_page)
+    p_page.set_defaults(func=pageprobe.run)
 
     p_run = sub.add_parser("run", help="run a YAML scrape config")
     p_run.add_argument("config")

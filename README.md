@@ -167,7 +167,7 @@ Two layers:
 
 ## Legal note
 
-Public data only. Respect robots.txt and rate limits. No login-gated content, no credential abuse. If a site forbids scraping, scrapeforge flags it and you decide with the site's terms in mind.
+Public data only. Respect each site's terms and rate limits. No login-gated content, no credential abuse.
 
 ## Repo metadata
 
