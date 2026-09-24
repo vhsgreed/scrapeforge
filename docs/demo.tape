@@ -2,7 +2,7 @@
 # VHS (https://github.com/charmbracelet/vhs) against the live sandbox site.
 # Locally: `vhs docs/demo.tape && cp /tmp/scrapeforge-demo.gif docs/demo.gif`
 # (needs vhs, ttyd, ffmpeg and scrapeforge on PATH).
-Output /tmp/scrapeforge-demo.gif
+Output "/tmp/scrapeforge-demo.gif"
 
 Set Shell "bash"
 Set FontSize 15
