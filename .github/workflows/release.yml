@@ -1,9 +1,16 @@
 name: release
 
-# Push a tag like v0.3.0 to build and publish to PyPI.
-# Uses PyPI trusted publishing (no API token in the repo). One-time setup on
-# pypi.org: Account -> Publishing -> add a pending publisher with this
-# repository, workflow file `release.yml`, and environment `pypi`.
+# Push a tag like v0.3.0 to test, build and check the package; the wheel
+# and sdist are kept as workflow artifacts.
+#
+# Publishing to PyPI is off until you opt in, because the name
+# `scrapeforge` is taken on PyPI by an unrelated project. To publish:
+#   1. set `name` in pyproject.toml to a free name (the command and
+#      `import scrapeforge` do not change);
+#   2. on pypi.org: Account -> Publishing -> add a pending trusted publisher
+#      for this repository, workflow `release.yml`, environment `pypi`;
+#   3. in GitHub: Settings -> Secrets and variables -> Actions -> Variables,
+#      add PYPI_PUBLISH = true.
 on:
   push:
     tags: ["v*"]
@@ -31,6 +38,7 @@ jobs:
 
   publish:
     needs: build
+    if: vars.PYPI_PUBLISH == 'true'
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
