@@ -195,6 +195,6 @@ pip install -e ".[dev]"
 python -m pytest -q
 ```
 
-Tests run offline against saved pages in `tests/fixtures/`. CI runs them on Python 3.11 to 3.14. The live check runs the examples against real sites daily, and pushing a `v*` tag publishes a release ([release.yml](.github/workflows/release.yml)).
+Tests run offline against saved pages in `tests/fixtures/`. CI runs them on Python 3.11 to 3.14. The live check runs the examples against real sites daily, and pushing a `v*` tag builds and checks a release. Publishing to PyPI is opt-in, see [release.yml](.github/workflows/release.yml).
 
 MIT licensed. Part of the [vhsgreed](https://vhsgreed.win) toolset.
