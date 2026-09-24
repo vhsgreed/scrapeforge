@@ -2,43 +2,163 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "scrapeforge dataset contract",
   "description": "Machine-readable contract for every dataset scrapeforge writes. One row per extracted item. Field names for item records come from the config's `fields:` block; probes and pagination probes emit fixed fields. Only fields the code actually emits are listed.",
-  "version": "0.2.0",
-  "updated": "2026-09-11",
+  "version": "0.3.0",
+  "updated": "2026-09-23",
   "datasets": {
     "item_records": {
       "produced_by": "scrapeforge run <config.yaml>",
-      "formats": ["csv", "json", "jsonl"],
-      "row_unit": "one matched item from items.selector",
+      "formats": [
+        "csv",
+        "json",
+        "jsonl"
+      ],
+      "row_unit": "one matched item from items.selector, or one object from items.json",
       "fields": {
         "type": "object",
-        "description": "Keyed by the field names in the config's `fields:` block. Every value is a string. Missing element or attribute resolves to the empty string, never null.",
+        "description": "Keyed by the field names in the config's `fields:` block. A field is a string unless it sets `type: int` or `type: float`. A missing string field is \"\" (or its `default`); a missing or unparseable number is null in JSON/JSONL and empty in CSV (or its `default`). With `run --since`, rows carry an extra `_change` field: \"new\" or \"changed\".",
         "additionalProperties": {
-          "type": "string"
+          "type": [
+            "string",
+            "number",
+            "null"
+          ]
+        },
+        "properties": {
+          "_change": {
+            "type": "string",
+            "enum": [
+              "new",
+              "changed"
+            ],
+            "description": "only with run --since"
+          }
         }
       },
       "views": {
         "hn-front": {
-          "formats": ["csv"],
+          "formats": [
+            "csv"
+          ],
           "fields": {
-            "title": { "type": "string", "source": "span.titleline a (text)" },
-            "url": { "type": "string", "source": "span.titleline a (href)" },
-            "score": { "type": "string", "source": "span.score (text, scope: global)" }
+            "title": {
+              "type": "string",
+              "source": "span.titleline a (text)"
+            },
+            "url": {
+              "type": "string",
+              "source": "span.titleline a (href)"
+            },
+            "score": {
+              "type": "string",
+              "source": "span.score (text, scope: next)"
+            }
           }
         },
         "aliexpress-led-strips": {
-          "formats": ["csv"],
+          "formats": [
+            "csv"
+          ],
           "fields": {
-            "title": { "type": "string", "source": "div.title (text)" },
-            "price": { "type": "string", "source": "span.price-current (text)" },
-            "url": { "type": "string", "source": "a (href)" }
+            "title": {
+              "type": "string",
+              "source": "div.title (text)"
+            },
+            "price": {
+              "type": "string",
+              "source": "span.price-current (text)"
+            },
+            "url": {
+              "type": "string",
+              "source": "a (href)"
+            }
           }
         },
         "4chan-g": {
-          "formats": ["json"],
+          "formats": [
+            "json"
+          ],
           "fields": {
-            "subject": { "type": "string", "source": "span.subject (text)" },
-            "body": { "type": "string", "source": "blockquote (text)" },
-            "replies": { "type": "string", "source": "div.posts (text)" }
+            "subject": {
+              "type": "string",
+              "source": "span.subject (text)"
+            },
+            "body": {
+              "type": "string",
+              "source": "blockquote (text)"
+            },
+            "replies": {
+              "type": "string",
+              "source": "div.posts (text)"
+            }
+          }
+        },
+        "books-toscrape": {
+          "formats": [
+            "csv"
+          ],
+          "fields": {
+            "title": {
+              "type": "string",
+              "source": "h3 a (title attribute)"
+            },
+            "url": {
+              "type": "string",
+              "source": "h3 a (href, absolute)"
+            },
+            "price": {
+              "type": "number",
+              "source": "p.price_color (float)"
+            },
+            "rating": {
+              "type": "string",
+              "source": "p.star-rating (class, regex)"
+            },
+            "in_stock": {
+              "type": "string",
+              "source": "p.availability (text)"
+            }
+          }
+        },
+        "quotes-toscrape": {
+          "formats": [
+            "jsonl"
+          ],
+          "fields": {
+            "text": {
+              "type": "string",
+              "source": "span.text"
+            },
+            "author": {
+              "type": "string",
+              "source": "small.author"
+            },
+            "author_url": {
+              "type": "string",
+              "source": "a[href*='/author/'] (href, absolute)"
+            },
+            "tags": {
+              "type": "string",
+              "source": "a.tag (all, joined with |)"
+            }
+          }
+        },
+        "quotes-js": {
+          "formats": [
+            "jsonl"
+          ],
+          "fields": {
+            "text": {
+              "type": "string",
+              "source": "var:data -> text"
+            },
+            "author": {
+              "type": "string",
+              "source": "var:data -> author.name"
+            },
+            "tags": {
+              "type": "string",
+              "source": "var:data -> tags.* (joined with |)"
+            }
           }
         }
       }
@@ -48,14 +168,40 @@
       "format": "csv",
       "row_unit": "one probed URL",
       "fields": {
-        "tier": { "type": "integer", "values": [1, 2, 3, 9], "description": "1 plain HTTP, 2 TLS impersonation, 3 browser escalation, 9 both fetches failed" },
-        "status": { "type": "integer", "description": "HTTP status code, 0 when the fetch failed" },
-        "bytes": { "type": "integer", "description": "response body size in bytes" },
-        "confident": { "type": "boolean" },
-        "via": { "type": "string", "description": "httpx | curl_cffi | httpx-fail:<Exc> | unknown" },
-        "host": { "type": "string" },
-        "url": { "type": "string" },
-        "note": { "type": "string" }
+        "tier": {
+          "type": "integer",
+          "values": [
+            1,
+            2,
+            3,
+            9
+          ],
+          "description": "1 plain HTTP, 2 TLS impersonation, 3 browser escalation, 9 both fetches failed"
+        },
+        "status": {
+          "type": "integer",
+          "description": "HTTP status code, 0 when the fetch failed"
+        },
+        "bytes": {
+          "type": "integer",
+          "description": "response body size in bytes"
+        },
+        "confident": {
+          "type": "boolean"
+        },
+        "via": {
+          "type": "string",
+          "description": "httpx | curl_cffi | httpx-fail:<Exc> | unknown"
+        },
+        "host": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
       }
     },
     "pagination_records": {
@@ -63,12 +209,31 @@
       "format": "csv",
       "row_unit": "one probed URL",
       "fields": {
-        "verdict": { "type": "string", "values": ["PAGINATED_OK", "NO_NEXT_LINK", "BLOCKED_AT_DEPTH", "NO_CONTENT_CHANGE", "ERROR"] },
-        "tier": { "type": "integer" },
-        "status": { "type": "integer" },
-        "host": { "type": "string" },
-        "url": { "type": "string" },
-        "note": { "type": "string" }
+        "verdict": {
+          "type": "string",
+          "values": [
+            "PAGINATED_OK",
+            "NO_NEXT_LINK",
+            "BLOCKED_AT_DEPTH",
+            "NO_CONTENT_CHANGE",
+            "ERROR"
+          ]
+        },
+        "tier": {
+          "type": "integer"
+        },
+        "status": {
+          "type": "integer"
+        },
+        "host": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
       }
     }
   }

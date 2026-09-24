@@ -76,13 +76,13 @@ def probe_one(url: str) -> dict:
             "confident": res.confident, "via": via, "note": res.note}
 
 
-def main(argv=None):
-    p = argparse.ArgumentParser(prog="scrapeforge batchprobe")
+def add_arguments(p: argparse.ArgumentParser) -> None:
     p.add_argument("files", nargs="+", help="text files with one URL per line")
     p.add_argument("--out", default="probe-results.csv")
     p.add_argument("--workers", type=int, default=WORKERS)
-    args = p.parse_args(argv)
 
+
+def run(args: argparse.Namespace) -> list[dict]:
     urls = []
     for f in args.files:
         with open(f, encoding="utf-8") as fh:
@@ -119,6 +119,12 @@ def main(argv=None):
     print(f"[batchprobe] done: {sorted(tiers.items())}", file=sys.stderr)
     print(f"[batchprobe] saved {args.out}", file=sys.stderr)
     return rows
+
+
+def main(argv=None):
+    p = argparse.ArgumentParser(prog="scrapeforge batchprobe")
+    add_arguments(p)
+    return run(p.parse_args(argv))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,17 @@
+# The same quotes, rendered by JavaScript: the HTML has no div.quote at all.
+# The data ships in the page as `var data = [...]`, so tier 1 reads it
+# without a browser. Checked daily.
+name: quotes-js
+url: https://quotes.toscrape.com/js/
+tier: 1
+max_pages: 3
+rate_limit_sec: 1.0
+paginate:
+  selector: "li.next a"
+items:
+  json: "var:data"
+fields:
+  text:   { path: text, strip: " “”" }
+  author: { path: author.name }
+  tags:   { path: "tags.*", all: true, join: "|" }
+output: jsonl

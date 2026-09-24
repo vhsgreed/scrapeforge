@@ -1,0 +1,18 @@
+# Sandbox catalogue built for scraping practice: stable, and checked daily
+# by .github/workflows/live.yml.
+name: books-toscrape
+url: https://books.toscrape.com/catalogue/page-1.html
+tier: 1
+max_pages: 3
+rate_limit_sec: 1.0
+paginate:
+  selector: "li.next a"
+items:
+  selector: "article.product_pod"
+fields:
+  title:    { selector: "h3 a", attr: title }            # link text is truncated
+  url:      { selector: "h3 a", attr: href, absolute: true }
+  price:    { selector: "p.price_color", type: float }
+  rating:   { selector: "p.star-rating", attr: class, regex: "star-rating (\\w+)" }
+  in_stock: { selector: "p.availability" }
+output: csv

@@ -11,7 +11,12 @@ from __future__ import annotations
 
 def fetch(url: str, tier: int, timeout: int = 30, proxy: str | None = None,
           cookies: dict | None = None) -> tuple[int, str]:
-    """Returns (status_code, html). Raises FetchError on hard failure."""
+    """Returns (status_code, html). Raises FetchError on hard failure.
+
+    file:// URLs read a saved page from disk (any tier), so a config can be
+    developed against a page saved once with `scrapeforge fetch`."""
+    if url.startswith("file://"):
+        return _read_file(url)
     if tier == 1:
         return _fetch_httpx(url, timeout, proxy, cookies)
     if tier == 2:
@@ -21,6 +26,25 @@ def fetch(url: str, tier: int, timeout: int = 30, proxy: str | None = None,
 
 class FetchError(RuntimeError):
     pass
+
+
+def _read_file(url: str) -> tuple[int, str]:
+    from urllib.parse import unquote, urlparse
+    path = unquote(urlparse(url).path)
+    try:
+        with open(path, encoding="utf-8", errors="replace") as f:
+            return 200, f.read()
+    except FileNotFoundError:
+        return 404, ""
+
+
+def to_url(target: str) -> str:
+    """A URL stays a URL; an existing local path becomes a file:// URL."""
+    import os
+    from pathlib import Path
+    if "://" not in target and os.path.exists(target):
+        return Path(target).resolve().as_uri()
+    return target
 
 
 def _fetch_httpx(url, timeout, proxy, cookies) -> tuple[int, str]:
@@ -51,42 +75,82 @@ def _fetch_curl_cffi(url, timeout, proxy, cookies) -> tuple[int, str]:
     return r.status_code, r.text
 
 
+def _cookie_params(url: str, cookies: dict | None) -> list[dict]:
+    """Config cookies ({name: value}) as Playwright cookie params."""
+    return [{"name": k, "value": str(v), "url": url}
+            for k, v in (cookies or {}).items()]
+
+
+def _playwright_proxy(proxy: str | None) -> dict | None:
+    """'http://user:pass@host:port' -> Playwright's proxy dict."""
+    if not proxy:
+        return None
+    from urllib.parse import urlparse
+    u = urlparse(proxy)
+    out = {"server": f"{u.scheme}://{u.hostname}" + (f":{u.port}" if u.port else "")}
+    if u.username:
+        out["username"] = u.username
+    if u.password:
+        out["password"] = u.password
+    return out
+
+
 def _fetch_browser(url, timeout, proxy, cookies) -> tuple[int, str]:
     """Amazon/eBay-class. Try scrapling (patchright stealth + cloudflare
     solve), then cloakbrowser, then plain playwright. None are magic; the
-    probe-first flow decides whether tier 3 is even offered."""
+    probe-first flow decides whether tier 3 is even offered.
+
+    Every backend honours proxy, cookies and timeout, and returns the real
+    HTTP status of the navigation (0 when the browser reports none), so a
+    403 challenge page is not passed off as a 200."""
     try:
         from scrapling.fetchers import StealthySession
-        with StealthySession(headless=True) as session:
-            page = session.fetch(url, solve_cloudflare=True)
-            return 200, page.html_content
     except ImportError:
         pass
+    else:
+        kwargs = dict(headless=True, timeout=timeout * 1000)
+        if proxy:
+            kwargs["proxy"] = proxy
+        if cookies:
+            kwargs["cookies"] = _cookie_params(url, cookies)
+        with StealthySession(**kwargs) as session:
+            page = session.fetch(url, solve_cloudflare=True)
+            return page.status, str(page.html_content)
+
     try:
         from cloakbrowser import launch
+    except ImportError:
+        pass
+    else:
         ctx = launch(headless=True, proxy=proxy)
         try:
             page = ctx.new_page()
             if cookies:
-                for name, value in cookies.items():
-                    page.context.add_cookies([{"name": name, "value": value,
-                                               "url": url}])
-            page.goto(url, timeout=timeout * 1000, wait_until="domcontentloaded")
-            return 200, page.content()
+                page.context.add_cookies(_cookie_params(url, cookies))
+            resp = page.goto(url, timeout=timeout * 1000,
+                             wait_until="domcontentloaded")
+            return (resp.status if resp else 0), page.content()
         finally:
             ctx.close()
-    except ImportError:
-        pass
+
     try:
         from playwright.sync_api import sync_playwright
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            ctx = browser.new_context()
-            page = ctx.new_page()
-            page.goto(url, timeout=timeout * 1000, wait_until="domcontentloaded")
-            html = page.content()
-            browser.close()
-            return 200, html
     except ImportError as e:
         raise FetchError("tier 3 needs scrapling or cloakbrowser or playwright "
                          "+ stealth deps") from e
+    with sync_playwright() as p:
+        launch_kwargs = {"headless": True}
+        pw_proxy = _playwright_proxy(proxy)
+        if pw_proxy:
+            launch_kwargs["proxy"] = pw_proxy
+        browser = p.chromium.launch(**launch_kwargs)
+        try:
+            ctx = browser.new_context()
+            if cookies:
+                ctx.add_cookies(_cookie_params(url, cookies))
+            page = ctx.new_page()
+            resp = page.goto(url, timeout=timeout * 1000,
+                             wait_until="domcontentloaded")
+            return (resp.status if resp else 0), page.content()
+        finally:
+            browser.close()

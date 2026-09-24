@@ -1,0 +1,51 @@
+name: release
+
+# Push a tag like v0.3.0 to test, build and check the package; the wheel
+# and sdist are kept as workflow artifacts.
+#
+# Publishing to PyPI is off until you opt in, because the name
+# `scrapeforge` is taken on PyPI by an unrelated project. To publish:
+#   1. set `name` in pyproject.toml to a free name (the command and
+#      `import scrapeforge` do not change);
+#   2. on pypi.org: Account -> Publishing -> add a pending trusted publisher
+#      for this repository, workflow `release.yml`, environment `pypi`;
+#   3. in GitHub: Settings -> Secrets and variables -> Actions -> Variables,
+#      add PYPI_PUBLISH = true.
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: tag matches package version
+        run: |
+          v=$(python -c "import re;print(re.search(r'__version__ = \"(.+?)\"', open('scrapeforge/__init__.py').read())[1])")
+          test "v$v" = "${GITHUB_REF_NAME}" || { echo "tag ${GITHUB_REF_NAME} != version $v"; exit 1; }
+      - run: pip install build twine pytest && pip install -e .
+      - run: python -m pytest -q
+      - run: python -m build
+      - run: twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    if: vars.PYPI_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

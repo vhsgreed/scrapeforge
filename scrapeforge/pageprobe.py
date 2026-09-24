@@ -133,15 +133,15 @@ def probe_pagination(url: str, tier: int) -> dict:
                 "verdict": "ERROR", "note": f"{type(e).__name__}: {str(e)[:60]}"}
 
 
-def main(argv=None):
-    p = argparse.ArgumentParser(prog="scrapeforge pageprobe")
+def add_arguments(p: argparse.ArgumentParser) -> None:
     p.add_argument("files", nargs="+", help="URL list files (one per line)")
     p.add_argument("--out", default="pagination-matrix.csv")
     p.add_argument("--tiers", default=None,
                    help="CSV from batchprobe to look up tiers (url,tier)")
     p.add_argument("--workers", type=int, default=WORKERS)
-    args = p.parse_args(argv)
 
+
+def run(args: argparse.Namespace) -> list[dict]:
     urls = []
     for f in args.files:
         with open(f, encoding="utf-8") as fh:
@@ -188,6 +188,13 @@ def main(argv=None):
         counts[r["verdict"]] = counts.get(r["verdict"], 0) + 1
     print(f"[pageprobe] done: {dict(sorted(counts.items()))}", file=sys.stderr)
     print(f"[pageprobe] saved {args.out}", file=sys.stderr)
+    return rows
+
+
+def main(argv=None):
+    p = argparse.ArgumentParser(prog="scrapeforge pageprobe")
+    add_arguments(p)
+    return run(p.parse_args(argv))
 
 
 if __name__ == "__main__":
